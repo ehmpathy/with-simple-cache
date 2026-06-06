@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.15.4](https://github.com/ehmpathy/with-simple-cache/compare/v0.15.3...v0.15.4) (2026-06-06)
+
+
+### Bug Fixes
+
+* **cache:** add meta option for cache uri in response ([#47](https://github.com/ehmpathy/with-simple-cache/issues/47)) ([232b9f5](https://github.com/ehmpathy/with-simple-cache/commit/232b9f54bfcfc1298f4a80e7534c65afc87ff197))
+
 ## [0.15.3](https://github.com/ehmpathy/with-simple-cache/compare/v0.15.2...v0.15.3) (2025-12-19)
 
 
