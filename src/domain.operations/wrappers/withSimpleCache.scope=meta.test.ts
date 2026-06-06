@@ -1,11 +1,11 @@
-import type {
-  SimpleCache,
-  WithCacheUri,
-} from '@src/domain.objects/SimpleCache';
 import {
   createExampleSyncCacheWithoutUri,
   createExampleSyncCacheWithUri,
 } from '@src/.test.assets/createExampleCache';
+import type {
+  SimpleCache,
+  WithCacheUri,
+} from '@src/domain.objects/SimpleCache';
 import { BadRequestError } from '@src/utils/errors/BadRequestError';
 
 import { withSimpleCache } from './withSimpleCache';
@@ -633,11 +633,7 @@ describe('withSimpleCache.scope=meta', () => {
           const wrapped = withSimpleCache(
             (_input: { query: string }): string => 'result',
             {
-              cache: ({
-                fromInput,
-              }: {
-                fromInput: [{ query: string }];
-              }) => {
+              cache: ({ fromInput }: { fromInput: [{ query: string }] }) => {
                 // @ts-expect-error - fromInput[1] does not exist (only one arg)
                 return fromInput[1].cache;
               },

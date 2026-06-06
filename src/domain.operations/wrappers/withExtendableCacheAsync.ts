@@ -9,7 +9,6 @@ import {
 } from '@src/domain.operations/serde/defaults';
 
 import {
-  type SimpleCacheOption,
   getOutputCacheOptionFromCacheInput,
   type WithSimpleCacheAsyncOptions,
   withSimpleCacheAsync,

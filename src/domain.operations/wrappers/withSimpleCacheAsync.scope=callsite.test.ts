@@ -127,5 +127,4 @@ describe('withSimpleCacheAsync.callsite.types', () => {
     // @ts-expect-error - result is wrapped, not direct Seaturtle
     const wrong: Seaturtle = result;
   });
-
 });

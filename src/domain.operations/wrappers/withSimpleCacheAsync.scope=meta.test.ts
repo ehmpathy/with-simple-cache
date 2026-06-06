@@ -371,7 +371,9 @@ describe('withSimpleCacheAsync.meta.types', () => {
         const wrapped = withSimpleCacheAsync(
           async (
             _input: { query: string },
-            _context: { services: { cache: WithCacheUri<SimpleCache<string>> } },
+            _context: {
+              services: { cache: WithCacheUri<SimpleCache<string>> };
+            },
           ): Promise<string> => 'result',
           {
             cache: ({
@@ -490,11 +492,7 @@ describe('withSimpleCacheAsync.meta.types', () => {
         const wrapped = withSimpleCacheAsync(
           async (_input: { query: string }): Promise<string> => 'result',
           {
-            cache: ({
-              fromInput,
-            }: {
-              fromInput: [{ query: string }];
-            }) => {
+            cache: ({ fromInput }: { fromInput: [{ query: string }] }) => {
               // @ts-expect-error - fromInput[1] does not exist (only one arg)
               return fromInput[1].cache;
             },
