@@ -1,0 +1,45 @@
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
+
+exports[`withSimpleCacheAsync.meta.types runtime behavior cache WITH uri method should return { output, cached } when meta: include 1`] = `
+{
+  "cached": {
+    "uri": "s3://test-bucket/prefix/{"id":"test-123"}",
+  },
+  "output": 42,
+}
+`;
+
+exports[`withSimpleCacheAsync.meta.types runtime behavior cache WITH uri method should return direct value when meta is absent (backwards compat) 1`] = `42`;
+
+exports[`withSimpleCacheAsync.meta.types runtime behavior cache WITH uri method should return direct value when meta: exclude 1`] = `42`;
+
+exports[`withSimpleCacheAsync.meta.types runtime behavior cache WITH uri method should return same { output, cached } shape for cache hit as miss 1`] = `
+{
+  "cached": {
+    "uri": "s3://test-bucket/prefix/{"id":"test-123"}",
+  },
+  "output": 42,
+}
+`;
+
+exports[`withSimpleCacheAsync.meta.types runtime behavior cache WITH uri method should wrap null output correctly with meta: include 1`] = `
+{
+  "cached": {
+    "uri": "s3://test-bucket/prefix/{"id":"test-123"}",
+  },
+  "output": null,
+}
+`;
+
+exports[`withSimpleCacheAsync.meta.types runtime behavior cache WITH uri method should wrap undefined output correctly with meta: include 1`] = `
+{
+  "cached": {
+    "uri": "s3://test-bucket/prefix/{"id":"test-123"}",
+  },
+  "output": undefined,
+}
+`;
+
+exports[`withSimpleCacheAsync.meta.types runtime behavior cache WITHOUT uri method should return direct value when meta is absent 1`] = `42`;
+
+exports[`withSimpleCacheAsync.meta.types runtime behavior cache WITHOUT uri method should return direct value when meta: exclude 1`] = `42`;

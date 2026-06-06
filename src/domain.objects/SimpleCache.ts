@@ -28,3 +28,24 @@ export interface SimpleAsyncCache<T> {
  * a simple cache
  */
 export type SimpleCache<T> = SimpleAsyncCache<T> | SimpleSyncCache<T>;
+
+/**
+ * intersect any SimpleCache with uri resolution capability
+ *
+ * use this type when you need to require a cache that can expose its storage location
+ */
+export type WithCacheUri<TCache extends SimpleCache<any>> = TCache & {
+  /**
+   * compute the URI for a given cache key
+   *
+   * @returns the full URI where this key is stored (e.g., 's3://bucket/prefix/key')
+   */
+  uri: (key: string) => string;
+};
+
+/**
+ * detect if cache has uri method
+ */
+export type HasCacheUri<C> = C extends { uri: (key: string) => string }
+  ? true
+  : false;

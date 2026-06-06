@@ -1,7 +1,7 @@
 import type { UniDuration } from '@ehmpathy/uni-time';
 import { isNotUndefined, type NotUndefined } from 'type-fns';
 
-import type { SimpleSyncCache } from '@src/domain.objects/SimpleCache';
+import type { HasCacheUri, SimpleCache } from '@src/domain.objects/SimpleCache';
 import {
   getCacheFromCacheChoice,
   type WithSimpleCacheChoice,
@@ -14,39 +14,123 @@ import {
   type KeySerializationMethod,
   noOp,
 } from '@src/domain.operations/serde/defaults';
+import { BadRequestError } from '@src/utils/errors/BadRequestError';
+
+export type CacheableLogicSync = (...args: any[]) => any;
+
+/**
+ * allowed meta values depend on whether cache has uri method
+ *
+ * 'include' is only available when cache has uri method
+ */
+type MetaValue<C extends SimpleCache<any>> =
+  HasCacheUri<C> extends true ? 'include' | 'exclude' : 'exclude';
+
+/**
+ * return type depends on meta value
+ */
+type WithMetaReturn<
+  L extends CacheableLogicSync,
+  M extends 'include' | 'exclude' | undefined,
+> = M extends 'include'
+  ? (...args: Parameters<L>) => {
+      output: ReturnType<L>;
+      cached: { uri: string };
+    }
+  : L;
 
 /**
  * options to configure cache for use with-simple-cache
  */
 export interface WithSimpleCacheOptions<
   /**
-   * the logic we are adding cache for
+   * the logic we wrap with cache
    */
-  L extends (...args: any) => any,
+  L extends CacheableLogicSync,
   /**
-   * the type of cache being used
+   * the cache type
    */
-  C extends SimpleSyncCache<any>,
+  C extends SimpleCache<any>,
+  /**
+   * whether to include cache metadata in the return value
+   */
+  M extends MetaValue<C> | undefined = undefined,
 > {
+  /**
+   * the cache to persist outputs
+   *
+   * accepts:
+   * - direct cache instance
+   * - extraction function: ({ fromInput }) => fromInput[1].cache
+   */
   cache: WithSimpleCacheChoice<Parameters<L>, C>;
+
+  /**
+   * custom serialization for cache keys and values
+   *
+   * use when the logic's return type differs from the cache's stored type
+   */
   serialize?: {
+    /**
+     * serialize input args to a cache key string
+     *
+     * @param input - the first argument passed to the wrapped function
+     * @param context - the second argument passed to the wrapped function (if any)
+     * @returns a string key for cache lookup
+     *
+     * @default JSON.stringify(input)
+     */
     key?: KeySerializationMethod<Parameters<L>>;
+
+    /**
+     * serialize the logic's output before cache set
+     *
+     * @param output - the return value from the wrapped function
+     * @returns the value to store in cache (must match cache's value type)
+     *
+     * @default identity (no transformation)
+     */
     value?: (output: ReturnType<L>) => NotUndefined<ReturnType<C['get']>>;
   };
+
+  /**
+   * custom deserialization for cached values
+   *
+   * use when the cache's stored type differs from the logic's return type
+   */
   deserialize?: {
+    /**
+     * deserialize cached value back to the logic's return type
+     *
+     * @param cached - the value retrieved from cache
+     * @returns the value to return to the caller (must match logic's return type)
+     *
+     * @default identity (no transformation)
+     */
     value?: (cached: NotUndefined<ReturnType<C['get']>>) => ReturnType<L>;
   };
+
+  /**
+   * time-to-live for cached values
+   *
+   * @example { seconds: 60 }
+   * @example { minutes: 5 }
+   * @example { hours: 1 }
+   * @example null // no expiration
+   *
+   * @default undefined (cache decides)
+   */
   expiration?: UniDuration | null;
 
   /**
-   * whether to bypass the cached for either the set or get operation
+   * whether to bypass the cache for get or set operations
    */
   bypass?: {
     /**
      * whether to bypass the cache for the get
      *
      * note
-     * - equivalent to the result not already being cached
+     * - equivalent to the result not already cached
      *
      * default
      * - process.env.CACHE_BYPASS_GET ? process.env.CACHE_BYPASS_GET === 'true' : process.env.CACHE_BYPASS === 'true'
@@ -57,13 +141,24 @@ export interface WithSimpleCacheOptions<
      * whether to bypass the cache for the set
      *
      * note
-     * - keeps whatever the previously cached value was, while returning the new value
+     * - keeps whatever the previously cached value was, returns the new value
      *
      * default
      * - process.env.CACHE_BYPASS_SET ? process.env.CACHE_BYPASS_SET === 'true' : process.env.CACHE_BYPASS === 'true'
      */
     set?: (input: Parameters<L>) => boolean;
   };
+
+  /**
+   * whether to include cache metadata in the return value
+   *
+   * - 'exclude' (default): returns the logic's return value directly
+   * - 'include': returns { output, cached } where cached.uri is present if cache supports it
+   *
+   * note
+   * - 'include' is only available when the cache has a uri method
+   */
+  meta?: M;
 }
 
 /**
@@ -80,13 +175,17 @@ export interface WithSimpleCacheOptions<
  */
 export const withSimpleCache = <
   /**
-   * the logic we are adding cache for
+   * the logic we wrap with cache
    */
-  L extends (...args: any[]) => any,
+  L extends CacheableLogicSync,
   /**
-   * the type of cache being used
+   * the cache type
    */
-  C extends SimpleSyncCache<any>,
+  C extends SimpleCache<any>,
+  /**
+   * whether to include cache metadata in the return value
+   */
+  M extends MetaValue<C> | undefined = undefined,
 >(
   logic: L,
   {
@@ -103,37 +202,58 @@ export const withSimpleCache = <
       get: defaultShouldBypassGetMethod,
       set: defaultShouldBypassSetMethod,
     },
-  }: WithSimpleCacheOptions<L, C>,
-): L => {
-  return ((...args: Parameters<L>): ReturnType<L> => {
+    meta,
+  }: WithSimpleCacheOptions<L, C, M>,
+): WithMetaReturn<L, M> => {
+  return ((...args: Parameters<L>): any => {
     // define key based on args the function was invoked with
     const key = serializeKey(args[0], args[1]);
 
     // define cache based on options
     const cache = getCacheFromCacheChoice({ forInput: args, cacheOption });
 
+    // runtime guard: meta: 'include' requires cache with uri method
+    if (meta === 'include' && typeof (cache as any).uri !== 'function') {
+      throw new BadRequestError(
+        "meta: 'include' requires cache with uri method",
+        { cache },
+      );
+    }
+
+    // helper to wrap output when meta: 'include'
+    const asOutput = (deserializedValue: ReturnType<L>) => {
+      if (meta === 'include') {
+        const cachedUri =
+          typeof (cache as any).uri === 'function'
+            ? (cache as any).uri(key)
+            : undefined;
+        return { output: deserializedValue, cached: { uri: cachedUri } };
+      }
+      return deserializedValue;
+    };
+
     // see if its already cached
-    const cachedValue: ReturnType<C['get']> = bypass.get?.(args)
-      ? undefined
-      : cache.get(key);
-    if (isNotUndefined(cachedValue)) return deserializeValue(cachedValue); // if already cached, return it immediately
+    const cachedValue = bypass.get?.(args) ? undefined : cache.get(key);
+    if (isNotUndefined(cachedValue))
+      return asOutput(deserializeValue(cachedValue)); // if already cached, return it immediately
 
     // if its not, grab the output from the logic
     const output: ReturnType<L> = logic(...args);
 
     // if was asked to bypass cache.set, we can return the output now
-    if (bypass.set?.(args)) return output;
+    if (bypass.set?.(args)) return asOutput(output);
 
     // set the output to the cache
     const serializedOutput = serializeValue(output);
     cache.set(key, serializedOutput, { expiration });
 
     // if the output was undefined, we can just return here - no deserialization needed
-    if (output === undefined) return output;
+    if (output === undefined) return asOutput(output);
 
     // and now re-get from the cache, to ensure that output on first response === output on second response
-    const cachedValueNow: Awaited<ReturnType<C['get']>> = cache.get(key);
-    if (isNotUndefined(cachedValueNow)) return deserializeValue(cachedValueNow);
+    const cachedValueNow = cache.get(key);
+    if (isNotUndefined(cachedValueNow))
+      return asOutput(deserializeValue(cachedValueNow));
 
     // otherwise, somehow, get-after-set returned undefined. warn about this and return output
     // eslint-disable-next-line no-console
@@ -142,6 +262,6 @@ export const withSimpleCache = <
       'withSimpleCache encountered a situation which should not occur: cache.get returned undefined immediately after having been set. returning the output directly to prevent irrecoverable failure.',
       { key },
     );
-    return output;
-  }) as L;
+    return asOutput(output);
+  }) as WithMetaReturn<L, M>;
 };
