@@ -13,26 +13,25 @@ import {
 } from './getCacheFromCacheChoice';
 
 /**
- * a function which is capable of grabbing the cache from arguments to the `invalidate` or `update` commands, supporting both the case when invoked with `forInput` and when invoked with `forKey`
+ * a function which grabs the cache from arguments to `invalidate` or `update` commands,
+ * supports both `forInput` and `forKey` invocation patterns
  */
 export const getCacheFromCacheChoiceOrFromForKeyArgs = <
   /**
-   * the logic we are adding cache for
+   * the logic we wrap with cache
    */
   L extends (...args: any) => any,
-  /**
-   * the type of cache being used
-   */
-  C extends SimpleCache<any>,
 >({
   args,
   options,
   trigger,
 }: {
-  args: { forKey: string; cache?: C } | { forInput: Parameters<L> };
-  options: { cache: WithSimpleCacheChoice<Parameters<L>, C> };
+  args:
+    | { forKey: string; cache?: SimpleCache<any> }
+    | { forInput: Parameters<L> };
+  options: { cache: WithSimpleCacheChoice<Parameters<L>> };
   trigger: WithExtendableCacheTrigger;
-}): C => {
+}): SimpleCache<any> => {
   // if the args have the forInput property, then we can grab the cache like normal
   if (hasForInputProperty(args))
     return getCacheFromCacheChoice({

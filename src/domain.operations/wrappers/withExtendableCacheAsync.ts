@@ -1,6 +1,6 @@
 import { isAFunction } from 'type-fns';
 
-import type { SimpleAsyncCache } from '@src/domain.objects/SimpleCache';
+import type { SimpleCache } from '@src/domain.objects/SimpleCache';
 import { getCacheFromCacheChoiceOrFromForKeyArgs } from '@src/domain.operations/options/getCacheFromCacheChoiceOrFromForKeyArgs';
 import {
   defaultKeySerializationMethod,
@@ -34,13 +34,13 @@ export const hasForInputProperty = (obj: any): obj is { forInput: any } =>
  */
 export interface LogicWithExtendableCacheAsync<
   /**
-   * the logic we are adding cache for
+   * the logic we are wrapping with cache
    */
   L extends (...args: any) => Promise<any>,
   /**
    * the type of cache being used
    */
-  C extends SimpleAsyncCache<any>,
+  C extends SimpleCache<any>,
 > {
   /**
    * execute the logic with cache
@@ -139,9 +139,9 @@ export const withExtendableCacheAsync = <
    */
   L extends (...args: any) => Promise<any>,
   /**
-   * the type of cache being used
+   * the cache type
    */
-  C extends SimpleAsyncCache<any>,
+  C extends SimpleCache<any>,
 >(
   logic: L,
   options: WithSimpleCacheAsyncOptions<L, C>,

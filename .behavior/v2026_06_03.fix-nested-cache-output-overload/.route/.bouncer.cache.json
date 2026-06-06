@@ -1,0 +1,11 @@
+{
+  "protections": [
+    {
+      "glob": "src/**/*",
+      "stone": "3.3.1.blueprint.product",
+      "guard": ".behavior/v2026_06_03.fix-nested-cache-output-overload/3.3.1.blueprint.product.guard",
+      "route": ".behavior/v2026_06_03.fix-nested-cache-output-overload",
+      "passed": true
+    }
+  ]
+}

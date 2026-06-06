@@ -134,11 +134,11 @@ export interface LogicWithExtendableCache<
  */
 export const withExtendableCache = <
   /**
-   * the logic we are adding cache for
+   * the logic we wrap with cache
    */
   L extends (...args: any) => any,
   /**
-   * the type of cache being used
+   * the cache type
    */
   C extends SimpleSyncCache<any>,
 >(

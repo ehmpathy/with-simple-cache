@@ -1,5 +1,4 @@
 # with-simple-cache
-# with-simple-cache
 
 ![ci_on_commit](https://github.com/ehmpathy/with-simple-cache/workflows/ci_on_commit/badge.svg)
 ![deploy_on_tag](https://github.com/ehmpathy/with-simple-cache/workflows/deploy_on_tag/badge.svg)
@@ -177,7 +176,7 @@ const getRecipesFromApiWithLocalStorageCache = withSimpleCacheAsync(getRecipesFr
 
 ### Define the cache at runtime from function inputs
 
-if your cache is defined as part of the inputs to your function (e.g., if you're using the input context pattern), you define where to find the cache in the inputs
+if your cache is defined as part of the inputs to your function (e.g., via the input context pattern), you can define where to find the cache in the inputs
 
 for example
 ```ts
@@ -196,6 +195,39 @@ const getBookByName = withSimpleCache(
 
 const book = await getBookByName({ name: 'Hitchhikers Guide to the Galaxy' }, { cache: createCache() });
 ```
+
+### Include cache metadata in the response
+
+if you need access to cache metadata (e.g., the cache URI for debug or log purposes), use `meta: 'include'` to return both the output and cache info
+
+note: this requires a cache with a `uri` method (e.g., S3 or on-disk caches that can provide a location)
+
+```ts
+import { createCache } from 'simple-on-disk-cache';
+import { withSimpleCacheAsync } from 'with-simple-cache';
+
+const fetchReport = withSimpleCacheAsync(
+  async ({ reportId }: { reportId: string }) => {
+    /* ... fetch report ... */
+    return reportData;
+  },
+  {
+    cache: createCache({ directory: { s3: { bucket: 'reports', prefix: 'cache' } } }),
+    meta: 'include',
+  },
+);
+
+const result = await fetchReport({ reportId: 'abc-123' });
+// result.output = the report data
+// result.cached.uri = 's3://reports/cache/{"reportId":"abc-123"}'
+
+console.log(`Report cached at: ${result.cached.uri}`);
+```
+
+this is useful when you want to:
+- log where cached data is stored for debug
+- pass the cache URI to other systems
+- verify cache behavior in tests
 
 
 # Features

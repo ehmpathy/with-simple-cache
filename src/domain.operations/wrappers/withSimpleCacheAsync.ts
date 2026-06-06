@@ -2,7 +2,7 @@ import type { UniDuration } from '@ehmpathy/uni-time';
 import { createCache, type SimpleInMemoryCache } from 'simple-in-memory-cache';
 import { isNotUndefined, type NotUndefined } from 'type-fns';
 
-import type { SimpleCache } from '@src/domain.objects/SimpleCache';
+import type { HasCacheUri, SimpleCache } from '@src/domain.objects/SimpleCache';
 import {
   getCacheFromCacheChoice,
   type WithSimpleCacheChoice,
@@ -15,68 +15,143 @@ import {
   type KeySerializationMethod,
   noOp,
 } from '@src/domain.operations/serde/defaults';
+import { BadRequestError } from '@src/utils/errors/BadRequestError';
 
 import { withExtendableCache } from './withExtendableCache';
 
-export type AsyncLogic = (...args: any[]) => Promise<any>;
+/**
+ * allowed meta values depend on whether cache has uri method
+ *
+ * 'include' is only available when cache has uri method
+ */
+type MetaValue<C extends SimpleCache<any>> =
+  HasCacheUri<C> extends true ? 'include' | 'exclude' : 'exclude';
+
+/**
+ * return type depends on meta value
+ */
+type WithMetaReturnAsync<
+  L extends CacheableLogicAsync,
+  M extends 'include' | 'exclude' | undefined,
+> = M extends 'include'
+  ? (...args: Parameters<L>) => Promise<{
+      output: Awaited<ReturnType<L>>;
+      cached: { uri: string };
+    }>
+  : L;
+
+export type CacheableLogicAsync = (...args: any[]) => Promise<any>;
+
+/**
+ * cache option type: direct cache, extraction function, or object with output + deduplication
+ */
+export type SimpleCacheOption<
+  L extends CacheableLogicAsync,
+  C extends SimpleCache<any> = SimpleCache<any>,
+> =
+  | WithSimpleCacheChoice<Parameters<L>, C>
+  | {
+      output: WithSimpleCacheChoice<Parameters<L>, C>;
+      deduplication: SimpleInMemoryCache<any>;
+    };
 
 /**
  * options to configure cache for use with-simple-cache
  */
 export interface WithSimpleCacheAsyncOptions<
   /**
-   * the logic we are adding cache for
+   * the logic we wrap with cache
    */
-  L extends AsyncLogic,
+  L extends CacheableLogicAsync,
   /**
-   * the type of cache being used
+   * the cache type
    */
   C extends SimpleCache<any>,
+  /**
+   * whether to include cache metadata in the return value
+   */
+  M extends MetaValue<C> | undefined = undefined,
 > {
   /**
    * the cache to persist outputs
+   *
+   * accepts:
+   * - direct cache instance
+   * - extraction function: ({ fromInput }) => fromInput[1].cache
+   * - object: { output: cache, deduplication: inMemoryCache }
    */
-  cache:
-    | WithSimpleCacheChoice<Parameters<L>, C>
-    | {
-        /**
-         * the cache to cache output to
-         */
-        output: WithSimpleCacheChoice<Parameters<L>, C>;
+  cache: SimpleCacheOption<L, C>;
 
-        /**
-         * the cache to use for parallel in memory request deduplication
-         *
-         * note
-         * - by default, this method will use its own in-memory cache for deduplication
-         * - if required, you can pass in your own in-memory cache to use
-         *   - for example, if you're instantiating the wrapper on each execution of your logic, instead of globally
-         *   - important: if passing in your own, make sure that the cache time is at least as long as your longest resolving promise (e.g., 15min) ⚠️
-         */
-        deduplication: SimpleInMemoryCache<any>;
-      };
+  /**
+   * custom serialization for cache keys and values
+   *
+   * use when the logic's return type differs from the cache's stored type
+   */
   serialize?: {
+    /**
+     * serialize input args to a cache key string
+     *
+     * @param input - the first argument passed to the wrapped function
+     * @param context - the second argument passed to the wrapped function (if any)
+     * @returns a string key for cache lookup
+     *
+     * @default JSON.stringify(input)
+     */
     key?: KeySerializationMethod<Parameters<L>>;
+
+    /**
+     * serialize the logic's output before cache set
+     *
+     * @param output - the return value from the wrapped function (awaited)
+     * @returns the value to store in cache (must match cache's value type)
+     *
+     * @default identity (no transformation)
+     */
     value?: (
       output: Awaited<ReturnType<L>>,
     ) => NotUndefined<Awaited<ReturnType<C['get']>>>;
   };
+
+  /**
+   * custom deserialization for cached values
+   *
+   * use when the cache's stored type differs from the logic's return type
+   */
   deserialize?: {
+    /**
+     * deserialize cached value back to the logic's return type
+     *
+     * @param cached - the value retrieved from cache
+     * @returns the value to return to the caller (must match logic's return type)
+     *
+     * @default identity (no transformation)
+     */
     value?: (
       cached: NotUndefined<Awaited<ReturnType<C['get']>>>,
     ) => Awaited<ReturnType<L>>;
   };
+
+  /**
+   * time-to-live for cached values
+   *
+   * @example { seconds: 60 }
+   * @example { minutes: 5 }
+   * @example { hours: 1 }
+   * @example null // no expiration
+   *
+   * @default undefined (cache decides)
+   */
   expiration?: UniDuration | null;
 
   /**
-   * whether to bypass the cached for either the set or get operation
+   * whether to bypass the cache for get or set operations
    */
   bypass?: {
     /**
      * whether to bypass the cache for the get
      *
      * note
-     * - equivalent to the result not already being cached
+     * - equivalent to the result not already cached
      *
      * default
      * - process.env.CACHE_BYPASS_GET ? process.env.CACHE_BYPASS_GET === 'true' : process.env.CACHE_BYPASS === 'true'
@@ -87,69 +162,72 @@ export interface WithSimpleCacheAsyncOptions<
      * whether to bypass the cache for the set
      *
      * note
-     * - keeps whatever the previously cached value was, while returning the new value
+     * - keeps whatever the previously cached value was, while returns the new value
      *
      * default
      * - process.env.CACHE_BYPASS_SET ? process.env.CACHE_BYPASS_SET === 'true' : process.env.CACHE_BYPASS === 'true'
      */
     set?: (input: Parameters<L>) => boolean;
   };
+
+  /**
+   * whether to include cache metadata in the return value
+   *
+   * - 'exclude' (default): returns the logic's return value directly
+   * - 'include': returns { output, cached } where cached.uri is present if cache supports it
+   *
+   * note
+   * - 'include' is only available when the cache has a uri method
+   */
+  meta?: M;
 }
 
 /**
- * method to get the output cache option chosen by the user from the cache input
+ * get the output cache choice from the cache input
  */
 export const getOutputCacheOptionFromCacheInput = <
-  /**
-   * the logic we are adding cache for
-   */
-  L extends AsyncLogic,
-  /**
-   * the type of cache being used
-   */
+  L extends CacheableLogicAsync,
   C extends SimpleCache<any>,
 >(
-  cacheInput: WithSimpleCacheAsyncOptions<L, C>['cache'],
+  cacheInput: SimpleCacheOption<L, C>,
 ): WithSimpleCacheChoice<Parameters<L>, C> =>
   'output' in cacheInput ? cacheInput.output : cacheInput;
 
 /**
- * method to get the output cache option chosen by the user from the cache input
+ * get the deduplication cache from the cache input
  */
 const getDeduplicationCacheOptionFromCacheInput = <
-  /**
-   * the logic we are adding cache for
-   */
-  L extends AsyncLogic,
-  /**
-   * the type of cache being used
-   */
+  L extends CacheableLogicAsync,
   C extends SimpleCache<any>,
 >(
-  cacheInput: WithSimpleCacheAsyncOptions<L, C>['cache'],
+  cacheInput: SimpleCacheOption<L, C>,
 ): SimpleInMemoryCache<any> =>
   'deduplication' in cacheInput
     ? cacheInput.deduplication
     : createCache({
-        expiration: { minutes: 15 }, // support deduplicating requests that take up to 15 minutes to resolve, by default (note: we remove the promise as soon as it resolves through "serialize" method below)
+        expiration: { minutes: 15 },
       });
 
 /**
  * a wrapper which adds asynchronous cache to asynchronous logic
  *
  * note
- * - utilizes an additional in-memory synchronous cache under the hood to prevent duplicate requests (otherwise, while async cache is resolving, a duplicate parallel request may have be made)
- * - can be given a synchronous cache, since what you can do on an asynchronous cache you can do on a synchronous cache, but not the other way around
+ * - uses an additional in-memory synchronous cache under the hood to prevent duplicate requests
+ * - can accept a synchronous cache (sync is a subset of async capability)
  */
 export const withSimpleCacheAsync = <
   /**
-   * the logic we are adding cache for
+   * the logic we wrap with cache
    */
-  L extends AsyncLogic,
+  L extends CacheableLogicAsync,
   /**
-   * the type of cache being used
+   * the cache type
    */
   C extends SimpleCache<any>,
+  /**
+   * whether to include cache metadata in the return value
+   */
+  M extends MetaValue<C> | undefined = undefined,
 >(
   logic: L,
   {
@@ -164,12 +242,11 @@ export const withSimpleCacheAsync = <
       get: defaultShouldBypassGetMethod,
       set: defaultShouldBypassSetMethod,
     },
-  }: WithSimpleCacheAsyncOptions<L, C>,
-): L => {
+    meta,
+  }: WithSimpleCacheAsyncOptions<L, C, M>,
+): WithMetaReturnAsync<L, M> => {
   // add async cache to the logic
-  const logicWithAsyncCache = (async (
-    ...args: Parameters<L>
-  ): Promise<ReturnType<L>> => {
+  const logicWithAsyncCache = (async (...args: Parameters<L>): Promise<any> => {
     // define key based on args the function was invoked with
     const key = serializeKey(args[0], args[1]);
 
@@ -179,28 +256,48 @@ export const withSimpleCacheAsync = <
       cacheOption: getOutputCacheOptionFromCacheInput(cacheOption),
     });
 
+    // runtime guard: meta: 'include' requires cache with uri method
+    if (meta === 'include' && typeof (cache as any).uri !== 'function') {
+      throw new BadRequestError(
+        "meta: 'include' requires cache with uri method",
+        { cache },
+      );
+    }
+
+    // helper to wrap output when meta: 'include'
+    const asOutput = (deserializedValue: Awaited<ReturnType<L>>) => {
+      if (meta === 'include') {
+        const cachedUri =
+          typeof (cache as any).uri === 'function'
+            ? (cache as any).uri(key)
+            : undefined;
+        return { output: deserializedValue, cached: { uri: cachedUri } };
+      }
+      return deserializedValue;
+    };
+
     // see if its already cached
-    const cachedValue: Awaited<ReturnType<C['get']>> = bypass.get?.(args)
-      ? undefined
-      : await cache.get(key);
-    if (isNotUndefined(cachedValue)) return deserializeValue(cachedValue); // if already cached, return it immediately
+    const cachedValue = bypass.get?.(args) ? undefined : await cache.get(key);
+    if (isNotUndefined(cachedValue))
+      return asOutput(deserializeValue(cachedValue)); // if already cached, return it immediately
 
     // if its not, grab the output from the logic
     const output: Awaited<ReturnType<L>> = await logic(...args);
 
     // if was asked to bypass cache.set, we can return the output now
-    if (bypass.set?.(args)) return output;
+    if (bypass.set?.(args)) return asOutput(output);
 
     // set the output to the cache
     const serializedOutput = serializeValue(output);
     await cache.set(key, serializedOutput, { expiration });
 
     // if the output was undefined, we can just return here - no deserialization needed
-    if (output === undefined) return output;
+    if (output === undefined) return asOutput(output);
 
     // and now re-get from the cache, to ensure that output on first response === output on second response
-    const cachedValueNow: Awaited<ReturnType<C['get']>> = await cache.get(key);
-    if (isNotUndefined(cachedValueNow)) return deserializeValue(cachedValueNow);
+    const cachedValueNow = await cache.get(key);
+    if (isNotUndefined(cachedValueNow))
+      return asOutput(deserializeValue(cachedValueNow));
 
     // otherwise, somehow, get-after-set returned undefined. warn about this and return output
     // eslint-disable-next-line no-console
@@ -209,7 +306,7 @@ export const withSimpleCacheAsync = <
       'withSimpleCacheAsync encountered a situation which should not occur: cache.get returned undefined immediately after having been set. returning the output directly to prevent irrecoverable failure.',
       { key },
     );
-    return output;
+    return asOutput(output);
   }) as L;
 
   // wrap the logic with extended sync cache, to ensure that duplicate requests resolve the same promise from in-memory (rather than each getting a promise to check the async cache + operate separately)
@@ -223,7 +320,7 @@ export const withSimpleCacheAsync = <
   // define a function which the user will run which kicks off the result + invalidates the in-memory cache promise as soon as it finishes
   const logicWithAsyncCacheAndInMemoryRequestDeduplication = async (
     ...args: Parameters<L>
-  ): Promise<ReturnType<L>> => {
+  ): Promise<any> => {
     // start executing the request w/ async cache + sync cache
     const promiseResult = execute(...args);
 
@@ -237,5 +334,8 @@ export const withSimpleCacheAsync = <
   };
 
   // return the function w/ async cache and sync-in-memory-request-deduplication
-  return logicWithAsyncCacheAndInMemoryRequestDeduplication as L;
+  return logicWithAsyncCacheAndInMemoryRequestDeduplication as WithMetaReturnAsync<
+    L,
+    M
+  >;
 };
