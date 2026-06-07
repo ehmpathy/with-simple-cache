@@ -328,9 +328,10 @@ describe('withSimpleCacheAsync.meta.types', () => {
 
       it('extraction from first arg (input.cache)', async () => {
         const wrapped = withSimpleCacheAsync(
-          async (
-            _input: { query: string; cache: WithCacheUri<SimpleCache<string>> },
-          ): Promise<string> => 'result',
+          async (_input: {
+            query: string;
+            cache: WithCacheUri<SimpleCache<string>>;
+          }): Promise<string> => 'result',
           {
             cache: (input: {
               query: string;
@@ -360,12 +361,16 @@ describe('withSimpleCacheAsync.meta.types', () => {
         const wrapped = withSimpleCacheAsync(
           async (
             _input: { query: string },
-            _context: { services: { cache: WithCacheUri<SimpleCache<string>> } },
+            _context: {
+              services: { cache: WithCacheUri<SimpleCache<string>> };
+            },
           ): Promise<string> => 'result',
           {
             cache: (
               _input: { query: string },
-              context: { services: { cache: WithCacheUri<SimpleCache<string>> } },
+              context: {
+                services: { cache: WithCacheUri<SimpleCache<string>> };
+              },
             ) => context.services.cache,
             meta: 'include',
           },
@@ -614,7 +619,9 @@ describe('withSimpleCacheAsync.meta.types', () => {
 
         const error = await getError(async () => callApi({ id: 'test-123' }));
         expect(error).toBeInstanceOf(BadRequestError);
-        expect(error.message).toContain("meta: 'include' requires cache with uri method");
+        expect(error.message).toContain(
+          "meta: 'include' requires cache with uri method",
+        );
         expect(error.message).toMatchSnapshot();
       });
     });

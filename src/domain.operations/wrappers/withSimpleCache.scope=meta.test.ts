@@ -200,7 +200,9 @@ describe('withSimpleCache.scope=meta', () => {
 
         const error = getError(() => callApi({ id: 'test-123' }));
         expect(error).toBeInstanceOf(BadRequestError);
-        expect(error.message).toContain("meta: 'include' requires cache with uri method");
+        expect(error.message).toContain(
+          "meta: 'include' requires cache with uri method",
+        );
         expect(error.message).toMatchSnapshot();
       });
     });
@@ -472,9 +474,10 @@ describe('withSimpleCache.scope=meta', () => {
 
         it('extraction from first arg (input.cache)', () => {
           const wrapped = withSimpleCache(
-            (
-              _input: { query: string; cache: WithCacheUri<SimpleCache<string>> },
-            ): string => 'result',
+            (_input: {
+              query: string;
+              cache: WithCacheUri<SimpleCache<string>>;
+            }): string => 'result',
             {
               cache: (input: {
                 query: string;
@@ -503,12 +506,16 @@ describe('withSimpleCache.scope=meta', () => {
           const wrapped = withSimpleCache(
             (
               _input: { query: string },
-              _context: { services: { cache: WithCacheUri<SimpleCache<string>> } },
+              _context: {
+                services: { cache: WithCacheUri<SimpleCache<string>> };
+              },
             ): string => 'result',
             {
               cache: (
                 _input: { query: string },
-                context: { services: { cache: WithCacheUri<SimpleCache<string>> } },
+                context: {
+                  services: { cache: WithCacheUri<SimpleCache<string>> };
+                },
               ) => context.services.cache,
               meta: 'include',
             },
