@@ -1,4 +1,5 @@
 import type { UniDuration } from '@ehmpathy/uni-time';
+import { UnexpectedCodePathError } from 'helpful-errors';
 import { isNotUndefined, type NotUndefined } from 'type-fns';
 
 import type { HasCacheUri, SimpleCache } from '@src/domain.objects/SimpleCache';
@@ -61,7 +62,7 @@ export interface WithSimpleCacheOptions<
    *
    * accepts:
    * - direct cache instance
-   * - extraction function: ({ fromInput }) => fromInput[1].cache
+   * - extraction function: (_input, context) => context.cache
    */
   cache: WithSimpleCacheChoice<Parameters<L>, C>;
 
@@ -135,7 +136,7 @@ export interface WithSimpleCacheOptions<
      * default
      * - process.env.CACHE_BYPASS_GET ? process.env.CACHE_BYPASS_GET === 'true' : process.env.CACHE_BYPASS === 'true'
      */
-    get?: (input: Parameters<L>) => boolean;
+    get?: (...args: Parameters<L>) => boolean;
 
     /**
      * whether to bypass the cache for the set
@@ -146,7 +147,7 @@ export interface WithSimpleCacheOptions<
      * default
      * - process.env.CACHE_BYPASS_SET ? process.env.CACHE_BYPASS_SET === 'true' : process.env.CACHE_BYPASS === 'true'
      */
-    set?: (input: Parameters<L>) => boolean;
+    set?: (...args: Parameters<L>) => boolean;
   };
 
   /**
@@ -215,7 +216,7 @@ export const withSimpleCache = <
     // runtime guard: meta: 'include' requires cache with uri method
     if (meta === 'include' && typeof (cache as any).uri !== 'function') {
       throw new BadRequestError(
-        "meta: 'include' requires cache with uri method",
+        "meta: 'include' requires cache with uri method. use meta: 'exclude' or provide a cache that implements uri(key)",
         { cache },
       );
     }
@@ -233,15 +234,17 @@ export const withSimpleCache = <
     };
 
     // see if its already cached
-    const cachedValue = bypass.get?.(args) ? undefined : cache.get(key);
-    if (isNotUndefined(cachedValue))
-      return asOutput(deserializeValue(cachedValue)); // if already cached, return it immediately
+    const cachedValue = bypass.get?.(...args) ? undefined : cache.get(key);
 
-    // if its not, grab the output from the logic
+    // guard: return cached value if found
+    if (isNotUndefined(cachedValue))
+      return asOutput(deserializeValue(cachedValue));
+
+    // if not cached, grab the output from the logic
     const output: ReturnType<L> = logic(...args);
 
-    // if was asked to bypass cache.set, we can return the output now
-    if (bypass.set?.(args)) return asOutput(output);
+    // guard: bypass cache.set if requested
+    if (bypass.set?.(...args)) return asOutput(output);
 
     // set the output to the cache
     const serializedOutput = serializeValue(output);
@@ -255,13 +258,10 @@ export const withSimpleCache = <
     if (isNotUndefined(cachedValueNow))
       return asOutput(deserializeValue(cachedValueNow));
 
-    // otherwise, somehow, get-after-set returned undefined. warn about this and return output
-    // eslint-disable-next-line no-console
-    console.warn(
-      // warn about this because it should never occur
-      'withSimpleCache encountered a situation which should not occur: cache.get returned undefined immediately after having been set. returning the output directly to prevent irrecoverable failure.',
-      { key },
+    // otherwise, somehow, get-after-set returned undefined - this should never occur
+    throw new UnexpectedCodePathError(
+      'cache.get returned undefined immediately after cache.set. cache implementation may be inconsistent',
+      { key, output },
     );
-    return asOutput(output);
   }) as WithMetaReturn<L, M>;
 };

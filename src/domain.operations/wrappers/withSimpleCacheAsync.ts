@@ -1,4 +1,5 @@
 import type { UniDuration } from '@ehmpathy/uni-time';
+import { UnexpectedCodePathError } from 'helpful-errors';
 import { createCache, type SimpleInMemoryCache } from 'simple-in-memory-cache';
 import { isNotUndefined, type NotUndefined } from 'type-fns';
 
@@ -77,7 +78,7 @@ export interface WithSimpleCacheAsyncOptions<
    *
    * accepts:
    * - direct cache instance
-   * - extraction function: ({ fromInput }) => fromInput[1].cache
+   * - extraction function: (_input, context) => context.cache
    * - object: { output: cache, deduplication: inMemoryCache }
    */
   cache: SimpleCacheOption<L, C>;
@@ -156,7 +157,7 @@ export interface WithSimpleCacheAsyncOptions<
      * default
      * - process.env.CACHE_BYPASS_GET ? process.env.CACHE_BYPASS_GET === 'true' : process.env.CACHE_BYPASS === 'true'
      */
-    get?: (input: Parameters<L>) => boolean;
+    get?: (...args: Parameters<L>) => boolean;
 
     /**
      * whether to bypass the cache for the set
@@ -167,7 +168,7 @@ export interface WithSimpleCacheAsyncOptions<
      * default
      * - process.env.CACHE_BYPASS_SET ? process.env.CACHE_BYPASS_SET === 'true' : process.env.CACHE_BYPASS === 'true'
      */
-    set?: (input: Parameters<L>) => boolean;
+    set?: (...args: Parameters<L>) => boolean;
   };
 
   /**
@@ -259,7 +260,7 @@ export const withSimpleCacheAsync = <
     // runtime guard: meta: 'include' requires cache with uri method
     if (meta === 'include' && typeof (cache as any).uri !== 'function') {
       throw new BadRequestError(
-        "meta: 'include' requires cache with uri method",
+        "meta: 'include' requires cache with uri method. use meta: 'exclude' or provide a cache that implements uri(key)",
         { cache },
       );
     }
@@ -277,15 +278,19 @@ export const withSimpleCacheAsync = <
     };
 
     // see if its already cached
-    const cachedValue = bypass.get?.(args) ? undefined : await cache.get(key);
-    if (isNotUndefined(cachedValue))
-      return asOutput(deserializeValue(cachedValue)); // if already cached, return it immediately
+    const cachedValue = bypass.get?.(...args)
+      ? undefined
+      : await cache.get(key);
 
-    // if its not, grab the output from the logic
+    // guard: return cached value if found
+    if (isNotUndefined(cachedValue))
+      return asOutput(deserializeValue(cachedValue));
+
+    // if not cached, grab the output from the logic
     const output: Awaited<ReturnType<L>> = await logic(...args);
 
-    // if was asked to bypass cache.set, we can return the output now
-    if (bypass.set?.(args)) return asOutput(output);
+    // guard: bypass cache.set if requested
+    if (bypass.set?.(...args)) return asOutput(output);
 
     // set the output to the cache
     const serializedOutput = serializeValue(output);
@@ -299,14 +304,11 @@ export const withSimpleCacheAsync = <
     if (isNotUndefined(cachedValueNow))
       return asOutput(deserializeValue(cachedValueNow));
 
-    // otherwise, somehow, get-after-set returned undefined. warn about this and return output
-    // eslint-disable-next-line no-console
-    console.warn(
-      // warn about this because it should never occur
-      'withSimpleCacheAsync encountered a situation which should not occur: cache.get returned undefined immediately after having been set. returning the output directly to prevent irrecoverable failure.',
-      { key },
+    // otherwise, somehow, get-after-set returned undefined - this should never occur
+    throw new UnexpectedCodePathError(
+      'cache.get returned undefined immediately after cache.set. cache implementation may be inconsistent',
+      { key, output },
     );
-    return asOutput(output);
   }) as L;
 
   // wrap the logic with extended sync cache, to ensure that duplicate requests resolve the same promise from in-memory (rather than each getting a promise to check the async cache + operate separately)
@@ -325,12 +327,16 @@ export const withSimpleCacheAsync = <
     const promiseResult = execute(...args);
 
     // ensure that after the promise resolves, we remove it from the cache (so that unique subsequent requests can still be made)
-    const promiseResultAfterInvalidation = promiseResult
-      .finally(() => invalidate({ forInput: args }))
-      .then(() => promiseResult);
-
-    // return the result after invalidation
-    return promiseResultAfterInvalidation;
+    // note: .finally() preserves the original result/error, so we don't need .then()
+    // note: cleanup errors are caught so they don't hide the original result/error
+    return promiseResult.finally(() => {
+      try {
+        invalidate({ forInput: args });
+      } catch {
+        // cleanup errors are deliberately ignored - original result/error takes precedence
+        // this is NOT a failhide: we explicitly choose to prioritize the main operation outcome
+      }
+    });
   };
 
   // return the function w/ async cache and sync-in-memory-request-deduplication

@@ -5,12 +5,12 @@ import { withSimpleCache } from './withSimpleCache';
 /**
  * type tests for bypass callbacks type specificity
  *
- * verifies that bypass.get and bypass.set receive correctly typed args
+ * verifies that bypass.get and bypass.set receive correctly typed spread args
  *
  * symmetric with withSimpleCacheAsync.bypass.type.test.ts per rule.require.wrapper-symmetry
  */
 describe('withSimpleCache.bypass.types', () => {
-  it('bypass.get receives Parameters<L> tuple', () => {
+  it('bypass.get receives spread args (input, context)', () => {
     const cache: SimpleCache<number> = {
       get: () => 42,
       set: () => {},
@@ -24,16 +24,16 @@ describe('withSimpleCache.bypass.types', () => {
       {
         cache,
         bypass: {
-          get: (args) => {
-            // type proof: args is tuple [input, context]
-            const input: { searchId: string } = args[0];
-            const context: { forceRefresh: boolean } = args[1];
+          get: (input, context) => {
+            // type proof: input and context are correctly typed
+            const searchId: string = input.searchId;
+            const forceRefresh: boolean = context.forceRefresh;
 
-            // @ts-expect-error - args[0] is { searchId: string }, not { wrongProp: number }
-            const wrongInput: { wrongProp: number } = args[0];
+            // @ts-expect-error - input is { searchId: string }, not { wrongProp: number }
+            const wrongInput: { wrongProp: number } = input;
 
-            // @ts-expect-error - args[1] is { forceRefresh: boolean }, not { wrongProp: string }
-            const wrongContext: { wrongProp: string } = args[1];
+            // @ts-expect-error - context is { forceRefresh: boolean }, not { wrongProp: string }
+            const wrongContext: { wrongProp: string } = context;
 
             return context.forceRefresh;
           },
@@ -42,7 +42,7 @@ describe('withSimpleCache.bypass.types', () => {
     );
   });
 
-  it('bypass.set receives Parameters<L> tuple', () => {
+  it('bypass.set receives spread args (input, context)', () => {
     const cache: SimpleCache<number> = {
       get: () => 42,
       set: () => {},
@@ -56,16 +56,16 @@ describe('withSimpleCache.bypass.types', () => {
       {
         cache,
         bypass: {
-          set: (args) => {
-            // type proof: args is tuple [input, context]
-            const input: { searchId: string } = args[0];
-            const context: { skipPersist: boolean } = args[1];
+          set: (input, context) => {
+            // type proof: input and context are correctly typed
+            const searchId: string = input.searchId;
+            const skipPersist: boolean = context.skipPersist;
 
-            // @ts-expect-error - args[0] is { searchId: string }, not { wrongProp: number }
-            const wrongInput: { wrongProp: number } = args[0];
+            // @ts-expect-error - input is { searchId: string }, not { wrongProp: number }
+            const wrongInput: { wrongProp: number } = input;
 
-            // @ts-expect-error - args[1] is { skipPersist: boolean }, not { wrongProp: string }
-            const wrongContext: { wrongProp: string } = args[1];
+            // @ts-expect-error - context is { skipPersist: boolean }, not { wrongProp: string }
+            const wrongContext: { wrongProp: string } = context;
 
             return context.skipPersist;
           },
@@ -74,7 +74,7 @@ describe('withSimpleCache.bypass.types', () => {
     );
   });
 
-  it('bypass callback args mismatch should TYPE ERROR', () => {
+  it('bypass callback with extra arg should TYPE ERROR', () => {
     const cache: SimpleCache<number> = {
       get: () => 42,
       set: () => {},
@@ -85,9 +85,8 @@ describe('withSimpleCache.bypass.types', () => {
       {
         cache,
         bypass: {
-          get: (args) => {
-            // @ts-expect-error - args[1] does not exist (only one arg)
-            const wrong = args[1].someProperty;
+          // @ts-expect-error - callback accepts 2 args but wrapped function only has 1
+          get: (input, context) => {
             return false;
           },
         },

@@ -108,6 +108,9 @@ importers:
       rhachet-roles-rhachet:
         specifier: ^0.1.7
         version: 0.1.7(rhachet@1.41.15(@huggingface/transformers@4.2.0)(@tensorflow/tfjs@4.22.0(seedrandom@3.0.5))(@types/node@22.15.21)(zod@4.3.4))
+      test-fns:
+        specifier: 1.15.8
+        version: 1.15.8
       tsc-alias:
         specifier: 1.8.10
         version: 1.8.10
@@ -4616,6 +4619,10 @@ packages:
     resolution: {integrity: sha512-zC/qUA2lwfiXoQ00Ws8yD8LPA7p3n2a+Dl7wmI4iTXz4HbrU52riPY+AceGWgCAINs/cJ7cs9jnnASSPBwyGpg==}
     engines: {node: '>=8.0.0'}
 
+  test-fns@1.15.8:
+    resolution: {integrity: sha512-DCUZjdHJ2mNecITMry297wmR1j7XEgnFqwxuxIA+8830tuWNG3s8f/lM6iM19eMSTBMl8Sk/7AuJWJETv/4PEQ==}
+    engines: {node: '>=8.0.0'}
+
   test-fns@1.4.2:
     resolution: {integrity: sha512-Qz46tRQ7XjiCB5uZM+jLmluZBcp+dKTQ7wisoz8IJtLVUZN+Ta8DWksmTVS/pcdXieKR01gjuukDZHhIDcZvog==}
     engines: {node: '>=8.0.0'}
@@ -4786,6 +4793,7 @@ packages:
 
   uuid@10.0.0:
     resolution: {integrity: sha512-8XkAphELsDnEGrDxUOHB3RGvXz6TeuYSGEZBOjtTtPm2lwhGBjLgOzLHB63IUWfBpNucQjND6d3AOudO+H3RWQ==}
+    deprecated: uuid@10 and below is no longer supported.  For ESM codebases, update to uuid@latest.  For CommonJS codebases, use uuid@11 (but be aware this version will likely be deprecated in 2028).
     hasBin: true
 
   uuid@11.1.0:
@@ -10534,6 +10542,13 @@ snapshots:
       - aws-crt
       - ws
       - zod
+
+  test-fns@1.15.8:
+    dependencies:
+      domain-objects: 0.31.9
+      helpful-errors: 1.7.3
+      iso-time: 1.11.3
+      uuid: 10.0.0
 
   test-fns@1.4.2:
     dependencies:
