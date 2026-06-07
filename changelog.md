@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.16.0](https://github.com/ehmpathy/with-simple-cache/compare/v0.15.4...v0.16.0) (2026-06-07)
+
+
+### Features
+
+* **cache:** change extraction signature to spread args pattern ([#49](https://github.com/ehmpathy/with-simple-cache/issues/49)) ([c1760a9](https://github.com/ehmpathy/with-simple-cache/commit/c1760a9d66c22cfa868be65a9ab21354bbe3392e))
+
 ## [0.15.4](https://github.com/ehmpathy/with-simple-cache/compare/v0.15.3...v0.15.4) (2026-06-06)
 
 
