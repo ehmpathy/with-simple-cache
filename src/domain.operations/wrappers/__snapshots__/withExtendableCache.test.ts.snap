@@ -1,13 +1,13 @@
 // Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
 
 exports[`withExtendableCache invalidate should be able to invalidate a cached value by key when the cache is to be defined at runtime from inputs 1`] = `
-"BadRequestError: could not find the cache to invalidate in. invalidate was called forKey but the cache for this method was defined as a function which retrieves the cache from the input. therefore, since there is no input accessible, the cache should have been explicitly passed in on invalidate
+"BadRequestError: invalidate forKey requires cache arg when cache option is extraction function. pass { forKey, cache } or use forInput instead
 
 {"args":{"forKey":"andromeda"}}}"
 `;
 
 exports[`withExtendableCache update should be able to update a cached value by key when the cache is to be defined at runtime from inputs 1`] = `
-"BadRequestError: could not find the cache to update in. update was called forKey but the cache for this method was defined as a function which retrieves the cache from the input. therefore, since there is no input accessible, the cache should have been explicitly passed in on update
+"BadRequestError: update forKey requires cache arg when cache option is extraction function. pass { forKey, cache } or use forInput instead
 
 {"args":{"forKey":"andromeda","toValue":821}}}"
 `;

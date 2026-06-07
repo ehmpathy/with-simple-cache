@@ -1,3 +1,5 @@
+import { getError } from 'test-fns';
+
 import { createExampleAsyncCache } from '@src/.test.assets/createExampleCache';
 import type { SimpleAsyncCache } from '@src/domain.objects/SimpleCache';
 import { BadRequestError } from '@src/utils/errors/BadRequestError';
@@ -104,13 +106,13 @@ describe('withExtendableCacheAsync', () => {
       const callApi = withExtendableCacheAsync(
         async (
           { galaxy }: { galaxy: string },
-          _: { cache: SimpleAsyncCache<string> },
+          context: { cache: SimpleAsyncCache<string> },
         ) => {
           apiCalls.push(galaxy);
           return Math.random();
         },
         {
-          cache: ({ fromInput }) => fromInput[1].cache,
+          cache: (_input, context) => context.cache,
           serialize: {
             key: (input) => input.galaxy, // dont include cache as part of the key + simplify the key to just the galaxy
           },
@@ -131,18 +133,12 @@ describe('withExtendableCacheAsync', () => {
       expect(apiCalls.length).toEqual(2);
 
       // prove that it will throw a helpful error if we dont explicitly pass in the cache in this case
-      try {
-        await callApi.invalidate({ forKey: 'andromeda' });
-        throw new Error('should not reach here');
-      } catch (error) {
-        expect(error).toBeInstanceOf(BadRequestError);
-        if (!(error instanceof BadRequestError))
-          throw new Error('error should have been instance of BadRequestError'); // satisfy typescript defs
-        expect(error.message).toContain(
-          'could not find the cache to invalidate',
-        );
-        expect(error.message).toMatchSnapshot();
-      }
+      const error = await getError(async () =>
+        callApi.invalidate({ forKey: 'andromeda' }),
+      );
+      expect(error).toBeInstanceOf(BadRequestError);
+      expect(error.message).toContain('invalidate forKey requires cache arg');
+      expect(error.message).toMatchSnapshot();
 
       // invalidate the cached value for one of the inputs
       await callApi.invalidate({ forKey: 'andromeda', cache });
@@ -241,13 +237,13 @@ describe('withExtendableCacheAsync', () => {
       const callApi = withExtendableCacheAsync(
         async (
           { galaxy }: { galaxy: string },
-          _: { cache: SimpleAsyncCache<string> },
+          context: { cache: SimpleAsyncCache<string> },
         ) => {
           apiCalls.push(galaxy);
           return Math.random();
         },
         {
-          cache: ({ fromInput }) => fromInput[1].cache,
+          cache: (_input, context) => context.cache,
           serialize: {
             key: (input) => input.galaxy, // dont include cache as part of the key + simplify the key to just the galaxy
           },
@@ -268,16 +264,12 @@ describe('withExtendableCacheAsync', () => {
       expect(apiCalls.length).toEqual(2);
 
       // prove that it will throw a helpful error if we dont explicitly pass in the cache in this case
-      try {
-        await callApi.update({ forKey: 'andromeda', toValue: 821 });
-        throw new Error('should not reach here');
-      } catch (error) {
-        expect(error).toBeInstanceOf(BadRequestError);
-        if (!(error instanceof BadRequestError))
-          throw new Error('error should have been instance of BadRequestError'); // satisfy typescript defs
-        expect(error.message).toContain('could not find the cache to update');
-        expect(error.message).toMatchSnapshot();
-      }
+      const error = await getError(async () =>
+        callApi.update({ forKey: 'andromeda', toValue: 821 }),
+      );
+      expect(error).toBeInstanceOf(BadRequestError);
+      expect(error.message).toContain('update forKey requires cache arg');
+      expect(error.message).toMatchSnapshot();
 
       // invalidate the cached value for one of the inputs
       await callApi.update({ forKey: 'andromeda', toValue: 821, cache });

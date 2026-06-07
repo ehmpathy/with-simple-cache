@@ -29,24 +29,25 @@ export const getCacheFromCacheChoiceOrFromForKeyArgs = <
   args:
     | { forKey: string; cache?: SimpleCache<any> }
     | { forInput: Parameters<L> };
-  options: { cache: WithSimpleCacheChoice<Parameters<L>> };
+  options: { cache: WithSimpleCacheChoice<Parameters<L>, SimpleCache<any>> };
   trigger: WithExtendableCacheTrigger;
 }): SimpleCache<any> => {
-  // if the args have the forInput property, then we can grab the cache like normal
+  // guard: if args have forInput, extract cache from input as normal
   if (hasForInputProperty(args))
     return getCacheFromCacheChoice({
       forInput: args.forInput,
       cacheOption: options.cache,
     });
 
-  // otherwise, if the cache was explicitly declared, then use it
+  // guard: if cache was passed directly (not extraction function), use it
   if (!isAFunction(options.cache)) return options.cache;
 
-  // otherwise, we require the cache to have ben defined as an input to this method, when using invalidate by input, since we expect to grab the cache off of the input
+  // guard: forKey with extraction function requires explicit cache arg
   if (!args.cache)
     throw new BadRequestError(
-      `could not find the cache to ${trigger.toLowerCase()} in. ${trigger.toLowerCase()} was called forKey but the cache for this method was defined as a function which retrieves the cache from the input. therefore, since there is no input accessible, the cache should have been explicitly passed in on ${trigger.toLowerCase()}`,
+      `${trigger.toLowerCase()} forKey requires cache arg when cache option is extraction function. pass { forKey, cache } or use forInput instead`,
       { args },
     );
+
   return args.cache;
 };

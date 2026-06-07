@@ -7,18 +7,18 @@ import { BadRequestError } from '@src/utils/errors/BadRequestError';
  * a method which specifies how to extract a simple-cache from input args
  *
  * usage:
- * - cache: ({ fromInput }) => fromInput[1].cache
- * - cache: ({ fromInput }) => fromInput[0].options.cache
+ * - cache: (_input, context) => context.cache
+ * - cache: (input) => input.options.cache
  *
  * note
  * - C generic captures the actual cache type (e.g., WithCacheUri)
- * - defaults to SimpleCache<any> for backwards compatibility
- * - inline functions now preserve return type for meta: 'include'
+ * - no default value to enable better type inference
+ * - inline functions preserve return type for meta: 'include'
  */
 export type SimpleCacheExtractionMethod<
   LI extends any[],
-  C extends SimpleCache<any> = SimpleCache<any>,
-> = (args: { fromInput: LI }) => C;
+  C extends SimpleCache<any>,
+> = (...args: LI) => C;
 
 /**
  * how the cache can be specified for use with simple cache
@@ -27,31 +27,40 @@ export type SimpleCacheExtractionMethod<
  *
  * note
  * - C generic captures the actual cache type (e.g., WithCacheUri)
- * - inline extraction functions now work with meta: 'include'
+ * - inline extraction functions work with meta: 'include'
  */
 export type WithSimpleCacheChoice<
   LI extends any[],
-  C extends SimpleCache<any> = SimpleCache<any>,
+  C extends SimpleCache<any>,
 > = C | SimpleCacheExtractionMethod<LI, C>;
 
 /**
  * how to extract the with simple cache choice
  */
-export const getCacheFromCacheChoice = <LI extends any[]>({
+export const getCacheFromCacheChoice = <
+  LI extends any[],
+  C extends SimpleCache<any>,
+>({
   forInput,
   cacheOption,
 }: {
   forInput: LI;
-  cacheOption: WithSimpleCacheChoice<LI>;
-}): SimpleCache<any> => {
+  cacheOption: WithSimpleCacheChoice<LI, C>;
+}): C => {
+  // handle extraction function: call it with input args to get cache
   if (isAFunction(cacheOption)) {
-    const foundCache = cacheOption({ fromInput: forInput });
+    const foundCache = cacheOption(...forInput);
+
+    // guard: extraction function must return a valid cache
     if (!foundCache)
       throw new BadRequestError(
-        'could not extract cache from input with cache resolution method',
+        'cache extraction function returned falsy value. ensure the extraction function returns a valid cache, or pass the cache directly instead of an extraction function',
         { forInput },
       );
+
     return foundCache;
   }
+
+  // otherwise, cache was passed directly
   return cacheOption;
 };

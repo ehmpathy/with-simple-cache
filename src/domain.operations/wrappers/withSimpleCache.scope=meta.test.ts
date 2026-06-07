@@ -1,3 +1,5 @@
+import { getError } from 'test-fns';
+
 import {
   createExampleSyncCacheWithoutUri,
   createExampleSyncCacheWithUri,
@@ -196,10 +198,12 @@ describe('withSimpleCache.scope=meta', () => {
           { cache, meta: 'include' as any },
         );
 
-        expect(() => callApi({ id: 'test-123' })).toThrow(BadRequestError);
-        expect(() => callApi({ id: 'test-123' })).toThrow(
+        const error = getError(() => callApi({ id: 'test-123' }));
+        expect(error).toBeInstanceOf(BadRequestError);
+        expect(error.message).toContain(
           "meta: 'include' requires cache with uri method",
         );
+        expect(error.message).toMatchSnapshot();
       });
     });
   });
@@ -343,7 +347,7 @@ describe('withSimpleCache.scope=meta', () => {
       });
     });
 
-    describe('dynamic cache extraction via ({ fromInput }) => cache', () => {
+    describe('dynamic cache extraction via (...args) => cache', () => {
       it('meta: include should compile when cache option is typed as WithCacheUri', () => {
         const cacheOption: WithCacheUri<SimpleCache<string>> = {
           get: () => 'cached',
@@ -382,22 +386,18 @@ describe('withSimpleCache.scope=meta', () => {
         );
       });
 
-      describe('positive: inline extraction works', () => {
-        it('inline extraction with meta: include', () => {
+      describe('positive: extraction function works', () => {
+        it('extraction with meta: include', () => {
           const wrapped = withSimpleCache(
             (
               _input: { query: string },
               _context: { cache: WithCacheUri<SimpleCache<string>> },
             ): string => 'result',
             {
-              cache: ({
-                fromInput,
-              }: {
-                fromInput: [
-                  { query: string },
-                  { cache: WithCacheUri<SimpleCache<string>> },
-                ];
-              }) => fromInput[1].cache,
+              cache: (
+                _input: { query: string },
+                context: { cache: WithCacheUri<SimpleCache<string>> },
+              ) => context.cache,
               meta: 'include',
             },
           );
@@ -419,21 +419,17 @@ describe('withSimpleCache.scope=meta', () => {
           expect(uri).toBeDefined();
         });
 
-        it('inline extraction with meta: exclude', () => {
+        it('extraction with meta: exclude', () => {
           const wrapped = withSimpleCache(
             (
               _input: { query: string },
               _context: { cache: WithCacheUri<SimpleCache<string>> },
             ): string => 'result',
             {
-              cache: ({
-                fromInput,
-              }: {
-                fromInput: [
-                  { query: string },
-                  { cache: WithCacheUri<SimpleCache<string>> },
-                ];
-              }) => fromInput[1].cache,
+              cache: (
+                _input: { query: string },
+                context: { cache: WithCacheUri<SimpleCache<string>> },
+              ) => context.cache,
               meta: 'exclude',
             },
           );
@@ -453,18 +449,17 @@ describe('withSimpleCache.scope=meta', () => {
           expect(direct).toBeDefined();
         });
 
-        it('inline extraction without meta (backwards compat)', () => {
+        it('extraction without meta (backwards compat)', () => {
           const wrapped = withSimpleCache(
             (
               _input: { query: string },
               _context: { cache: SimpleCache<string> },
             ): string => 'result',
             {
-              cache: ({
-                fromInput,
-              }: {
-                fromInput: [{ query: string }, { cache: SimpleCache<string> }];
-              }) => fromInput[1].cache,
+              cache: (
+                _input: { query: string },
+                context: { cache: SimpleCache<string> },
+              ) => context.cache,
             },
           );
 
@@ -477,20 +472,17 @@ describe('withSimpleCache.scope=meta', () => {
           expect(direct).toBeDefined();
         });
 
-        it('inline extraction from first arg (input.cache)', () => {
+        it('extraction from first arg (input.cache)', () => {
           const wrapped = withSimpleCache(
             (_input: {
               query: string;
               cache: WithCacheUri<SimpleCache<string>>;
             }): string => 'result',
             {
-              cache: ({
-                fromInput,
-              }: {
-                fromInput: [
-                  { query: string; cache: WithCacheUri<SimpleCache<string>> },
-                ];
-              }) => fromInput[0].cache,
+              cache: (input: {
+                query: string;
+                cache: WithCacheUri<SimpleCache<string>>;
+              }) => input.cache,
               meta: 'include',
             },
           );
@@ -510,7 +502,7 @@ describe('withSimpleCache.scope=meta', () => {
           expect(uri).toBeDefined();
         });
 
-        it('inline extraction from nested path (context.services.cache)', () => {
+        it('extraction from nested path (context.services.cache)', () => {
           const wrapped = withSimpleCache(
             (
               _input: { query: string },
@@ -519,14 +511,12 @@ describe('withSimpleCache.scope=meta', () => {
               },
             ): string => 'result',
             {
-              cache: ({
-                fromInput,
-              }: {
-                fromInput: [
-                  { query: string },
-                  { services: { cache: WithCacheUri<SimpleCache<string>> } },
-                ];
-              }) => fromInput[1].services.cache,
+              cache: (
+                _input: { query: string },
+                context: {
+                  services: { cache: WithCacheUri<SimpleCache<string>> };
+                },
+              ) => context.services.cache,
               meta: 'include',
             },
           );
@@ -549,45 +539,6 @@ describe('withSimpleCache.scope=meta', () => {
           expect(output).toBeDefined();
           expect(uri).toBeDefined();
         });
-
-        it('inline extraction with three-arg function', () => {
-          const wrapped = withSimpleCache(
-            (
-              _input: { query: string },
-              _context: { tenantId: string },
-              _options: { cache: WithCacheUri<SimpleCache<string>> },
-            ): string => 'result',
-            {
-              cache: ({
-                fromInput,
-              }: {
-                fromInput: [
-                  { query: string },
-                  { tenantId: string },
-                  { cache: WithCacheUri<SimpleCache<string>> },
-                ];
-              }) => fromInput[2].cache,
-              meta: 'include',
-            },
-          );
-
-          const result = wrapped(
-            { query: 'test' },
-            { tenantId: 'tenant-1' },
-            {
-              cache: {
-                get: () => 'cached',
-                set: () => {},
-                uri: () => 'gs://bucket/key',
-              },
-            },
-          );
-
-          const output: string = result.output;
-          const uri: string = result.cached.uri;
-          expect(output).toBeDefined();
-          expect(uri).toBeDefined();
-        });
       });
 
       describe('negative: inline extraction type errors', () => {
@@ -598,45 +549,9 @@ describe('withSimpleCache.scope=meta', () => {
               _context: { cache: SimpleCache<string> },
             ): string => 'result',
             {
-              cache: ({
-                fromInput,
-              }: {
-                fromInput: [{ query: string }, { cache: SimpleCache<string> }];
-              }) => fromInput[1].cache,
+              cache: (_input, context) => context.cache,
               // @ts-expect-error - meta: 'include' not allowed because cache lacks uri
               meta: 'include',
-            },
-          );
-        });
-
-        it('rejects wrong fromInput tuple type', () => {
-          const wrapped = withSimpleCache(
-            (
-              _input: { query: string },
-              _context: { cache: WithCacheUri<SimpleCache<string>> },
-            ): string => 'result',
-            {
-              // @ts-expect-error - fromInput[0] declares wrongProp but logic expects query
-              cache: ({
-                fromInput,
-              }: {
-                fromInput: [
-                  { wrongProp: number },
-                  { cache: WithCacheUri<SimpleCache<string>> },
-                ];
-              }) => fromInput[1].cache,
-            },
-          );
-        });
-
-        it('rejects access to non-existent arg index', () => {
-          const wrapped = withSimpleCache(
-            (_input: { query: string }): string => 'result',
-            {
-              cache: ({ fromInput }: { fromInput: [{ query: string }] }) => {
-                // @ts-expect-error - fromInput[1] does not exist (only one arg)
-                return fromInput[1].cache;
-              },
             },
           );
         });
@@ -649,11 +564,7 @@ describe('withSimpleCache.scope=meta', () => {
             ): string => 'result',
             {
               // @ts-expect-error - extraction returns string, not SimpleCache
-              cache: ({
-                fromInput,
-              }: {
-                fromInput: [{ query: string }, { notACache: string }];
-              }) => fromInput[1].notACache,
+              cache: (_input, context) => context.notACache,
             },
           );
         });

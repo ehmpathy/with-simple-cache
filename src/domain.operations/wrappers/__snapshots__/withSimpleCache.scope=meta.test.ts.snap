@@ -43,3 +43,9 @@ exports[`withSimpleCache.scope=meta runtime behavior cache WITH uri method shoul
 exports[`withSimpleCache.scope=meta runtime behavior cache WITHOUT uri method should return direct value when meta is absent 1`] = `42`;
 
 exports[`withSimpleCache.scope=meta runtime behavior cache WITHOUT uri method should return direct value when meta: exclude 1`] = `42`;
+
+exports[`withSimpleCache.scope=meta runtime behavior cache WITHOUT uri method should throw BadRequestError when meta: include (runtime guard) 1`] = `
+"BadRequestError: meta: 'include' requires cache with uri method. use meta: 'exclude' or provide a cache that implements uri(key)
+
+{"cache":{}}}"
+`;
