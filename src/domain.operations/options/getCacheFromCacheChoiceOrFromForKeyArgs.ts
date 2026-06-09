@@ -1,16 +1,13 @@
 import { isAFunction } from 'type-fns';
 
 import type { SimpleCache } from '@src/domain.objects/SimpleCache';
-import {
-  hasForInputProperty,
-  type WithExtendableCacheTrigger,
-} from '@src/domain.operations/wrappers/withExtendableCacheAsync';
 import { BadRequestError } from '@src/utils/errors/BadRequestError';
 
 import {
   getCacheFromCacheChoice,
   type WithSimpleCacheChoice,
 } from './getCacheFromCacheChoice';
+import { hasForInputProperty, type WithExtendableCacheTrigger } from './shared';
 
 /**
  * a function which grabs the cache from arguments to `invalidate` or `update` commands,

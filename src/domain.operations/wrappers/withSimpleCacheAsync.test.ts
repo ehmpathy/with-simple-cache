@@ -207,7 +207,7 @@ describe('withSimpleCacheAsync', () => {
       // define an example fn
       const expectedError = new Error('surprise!');
       const callApi = withSimpleCacheAsync(
-        // eslint-disable-next-line no-empty-pattern
+        // biome-ignore lint/correctness/noEmptyPattern: test fn that ignores args
         async ({}: { name: string }) => {
           throw expectedError;
         },

@@ -15,6 +15,7 @@ ignores:
   - rhachet-roles-bhuild
   - rhachet-roles-ehmpathy
   - rhachet-roles-rhachet
+  - test-fns
   - "@tsconfig/node20"
   - "@tsconfig/strictest"
   - "@biomejs/biome"
@@ -23,3 +24,4 @@ ignores:
   - "@swc/jest"
   - tsx
   - tsc-alias
+  - yalc
