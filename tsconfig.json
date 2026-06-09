@@ -15,11 +15,14 @@
     "paths": {
       "@src/*": [
         "src/*"
+      ],
+      "@/*": [
+        "*"
       ]
     },
     "incremental": true,
-    "module": "commonjs",
-    "moduleResolution": "node"
+    "module": "node16",
+    "moduleResolution": "node16"
   },
   "extends": [
     "@tsconfig/strictest/tsconfig.json",

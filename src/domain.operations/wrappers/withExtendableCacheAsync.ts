@@ -3,6 +3,10 @@ import { isAFunction } from 'type-fns';
 import type { SimpleCache } from '@src/domain.objects/SimpleCache';
 import { getCacheFromCacheChoiceOrFromForKeyArgs } from '@src/domain.operations/options/getCacheFromCacheChoiceOrFromForKeyArgs';
 import {
+  hasForInputProperty,
+  WithExtendableCacheTrigger,
+} from '@src/domain.operations/options/shared';
+import {
   defaultKeySerializationMethod,
   defaultValueDeserializationMethod,
   defaultValueSerializationMethod,
@@ -14,20 +18,8 @@ import {
   withSimpleCacheAsync,
 } from './withSimpleCacheAsync';
 
-/**
- * enumerates the extendable methods which can trigger cache operations
- */
-export enum WithExtendableCacheTrigger {
-  EXECUTE = 'EXECUTE',
-  INVALIDATE = 'INVALIDATE',
-  UPDATE = 'UPDATE',
-}
-
-/**
- * a simple typeguard which checks if an object has a property named `forInput`
- */
-export const hasForInputProperty = (obj: any): obj is { forInput: any } =>
-  !!obj.forInput;
+// re-export for backwards compatibility
+export { hasForInputProperty, WithExtendableCacheTrigger };
 
 /**
  * the shape of logic that was wrapped with extendable cache for an async cache
