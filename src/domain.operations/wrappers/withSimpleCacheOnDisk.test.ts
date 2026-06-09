@@ -13,7 +13,7 @@ describe('withSimpleCacheOnDisk', () => {
     // then we should be able to wrap it
     const wrapped = withSimpleCacheOnDisk(procedure, {
       procedure: { name: 'test', version: getUuid() },
-      directory: { mounted: { path: __dirname + '/.temp' } },
+      directory: { local: { path: __dirname + '/.temp' } },
     });
 
     // and it should work
