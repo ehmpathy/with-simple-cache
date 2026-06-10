@@ -8,30 +8,30 @@ importers:
 
   .:
     dependencies:
-      '@ehmpathy/uni-time':
-        specifier: ^1.7.4
-        version: 1.9.1
       domain-objects:
-        specifier: 0.31.12
-        version: 0.31.12
+        specifier: 0.31.13
+        version: 0.31.13
       helpful-errors:
         specifier: 1.7.3
         version: 1.7.3
+      iso-time:
+        specifier: 1.11.7
+        version: 1.11.7
       procedure-fns:
-        specifier: ^1.0.1
+        specifier: 1.0.1
         version: 1.0.1
       serde-fns:
-        specifier: ^1.3.1
+        specifier: 1.3.1
         version: 1.3.1
       simple-in-memory-cache:
-        specifier: ^0.4.0
-        version: 0.4.0
+        specifier: 0.4.2
+        version: 0.4.2
       simple-on-disk-cache:
-        specifier: 1.7.9
-        version: 1.7.9
+        specifier: 1.7.10
+        version: 1.7.10
       type-fns:
-        specifier: 1.21.2
-        version: 1.21.2
+        specifier: 1.21.3
+        version: 1.21.3
     devDependencies:
       '@biomejs/biome':
         specifier: 2.3.8
@@ -74,7 +74,7 @@ importers:
         version: 0.47.72(declapract@0.13.21)
       declastruct:
         specifier: 1.9.1
-        version: 1.9.1(domain-objects@0.31.12)
+        version: 1.9.1(domain-objects@0.31.13)
       declastruct-github:
         specifier: 1.4.0
         version: 1.4.0
@@ -2979,8 +2979,8 @@ packages:
     resolution: {integrity: sha512-jRHVFk8ZM1ObkSBtSM5QrygqWOBh66dBZm4iuFGdTGv3gotPvBZKASe3eXSBdBWXsL+ahdF2h+OdqD0IAnJVcg==}
     engines: {node: '>=8.0.0'}
 
-  domain-objects@0.31.12:
-    resolution: {integrity: sha512-LX5gAC+xweKSmvBNT6HMDIjH+3pi45MNFL1WQovp3kXagzgxFlcDXdXJ1V82kfoB4va6atjgYkVGERrt+prIPA==}
+  domain-objects@0.31.13:
+    resolution: {integrity: sha512-6i4w5gIV6lgOw9uEzETYW9Ejbm7H1OyQAwjE5zX6yPxUyTXT9CYAmrRuAIEmX83hy+YfK7gsh+6+6Ew7vKOCDA==}
     engines: {node: '>=8.0.0'}
 
   domain-objects@0.31.3:
@@ -4631,6 +4631,10 @@ packages:
     resolution: {integrity: sha512-FizjX3DqiWquodrMGgdpo7GBk9x745e/haifLJper3k1sC4Y9pibn8ysKgcfCtQNtga7V/HDsKNYnP6qyFW8rw==}
     engines: {node: '>=8.0.0'}
 
+  simple-in-memory-cache@0.4.2:
+    resolution: {integrity: sha512-NJw/bOHh1LtD7z4eSR4DIepppfMe5GizfVGrxuHaCa+sR/pDtGT28dsvX7KpH2dCMl29HCgYK1ITr8BAGFUXEA==}
+    engines: {node: '>=8.0.0'}
+
   simple-log-methods@0.6.1:
     resolution: {integrity: sha512-POHiGnZqnQSivzgSDJfVE3/GAVPUEG0zc5vRLKIPpTnIQ6IY0QhOJOO3Ur0rKgXzwU/hlYpqabkELR62CauMhA==}
     engines: {node: '>=8.0.0'}
@@ -4647,12 +4651,12 @@ packages:
     resolution: {integrity: sha512-VeI9erbjgKtZ8bwdpHqkqgZomVqchZHFWidN3/5Jmb6UcKHKdduiADPAVqIwvFmobFOEtIyybyVw5bEaZpKODw==}
     engines: {node: '>=8.0.0'}
 
-  simple-on-disk-cache@1.7.3:
-    resolution: {integrity: sha512-N5ILAhtiYSLVL2UyzVFfzcd/nWzgxPS/ksSYwUChDGS4HwKh6QR+18QwUtQ78oV/QXGDiXrtuNQxdTbwYrkfcw==}
+  simple-on-disk-cache@1.7.10:
+    resolution: {integrity: sha512-z/uFEnbxblAa0j3PmEwEZyKV73YwEG0vEgcFkjy4ppjlPhaL5oi6G5DvoBua5aFYEp8kjDOy4OpLPux4J6PWqA==}
     engines: {node: '>=8.0.0'}
 
-  simple-on-disk-cache@1.7.9:
-    resolution: {integrity: sha512-JxQNYS+0AnXdECLW2LKOEBoUFL8wDQKLEaazB7xSO8m2HXj7CEKmaAYCXZ6ads/aNiZVo5ETg58Z45ZTRN+ROw==}
+  simple-on-disk-cache@1.7.3:
+    resolution: {integrity: sha512-N5ILAhtiYSLVL2UyzVFfzcd/nWzgxPS/ksSYwUChDGS4HwKh6QR+18QwUtQ78oV/QXGDiXrtuNQxdTbwYrkfcw==}
     engines: {node: '>=8.0.0'}
 
   slash@3.0.0:
@@ -4902,6 +4906,10 @@ packages:
 
   type-fns@1.21.2:
     resolution: {integrity: sha512-9/E7WpYVjJxIisH2lSpHnqwetk6SxVx2M+EI1dv0SMp3ztB6Qg4zrYwURepJHyt/zNRTb7XoGoo1H5Bxq9wI5Q==}
+    engines: {node: '>=8.0.0'}
+
+  type-fns@1.21.3:
+    resolution: {integrity: sha512-aB66HI+uWPsU/XuCHUY2ShCdnNVyDQT2F3OSc2AyezMqQSIC9ww8UsnGFxvfAh54ku5PL4gHtBMueGWanbkSAA==}
     engines: {node: '>=8.0.0'}
 
   typescript@5.4.5:
@@ -8537,12 +8545,12 @@ snapshots:
       visualogic: 1.3.2
       with-simple-cache: 0.15.1
 
-  declastruct@1.9.1(domain-objects@0.31.12):
+  declastruct@1.9.1(domain-objects@0.31.13):
     dependencies:
       bottleneck: 2.19.5
       chalk: 5.4.1
       commander: 14.0.2
-      domain-objects: 0.31.12
+      domain-objects: 0.31.13
       helpful-errors: 1.5.3
       jest-diff: 30.0.2
       rhachet-artifact-git: 1.1.3
@@ -8638,7 +8646,7 @@ snapshots:
       '@types/yup': 0.29.14
       change-case: 4.1.2
       cross-sha256: 1.2.0
-      type-fns: 1.21.2
+      type-fns: 1.21.3
 
   domain-objects@0.31.0:
     dependencies:
@@ -8647,7 +8655,7 @@ snapshots:
       change-case: 4.1.2
       cross-sha256: 1.2.0
       helpful-errors: 1.7.3
-      type-fns: 1.21.2
+      type-fns: 1.21.3
 
   domain-objects@0.31.10:
     dependencies:
@@ -8663,7 +8671,7 @@ snapshots:
       type-fns: 1.21.2
       uuid-fns: 1.1.3
 
-  domain-objects@0.31.12:
+  domain-objects@0.31.13:
     dependencies:
       change-case: 4.1.2
       helpful-errors: 1.7.3
@@ -10694,12 +10702,19 @@ snapshots:
     dependencies:
       '@ehmpathy/uni-time': 1.9.1
 
+  simple-in-memory-cache@0.4.2:
+    dependencies:
+      domain-objects: 0.31.9
+      helpful-errors: 1.7.3
+      iso-time: 1.11.7
+      type-fns: 1.21.2
+
   simple-log-methods@0.6.1:
     dependencies:
       '@ehmpathy/error-fns': 1.3.7
       '@ehmpathy/uni-time': 1.9.1
       domain-glossary-procedure: 1.0.0
-      type-fns: 1.21.2
+      type-fns: 1.21.3
 
   simple-log-methods@0.6.12:
     dependencies:
@@ -10715,7 +10730,7 @@ snapshots:
       '@ehmpathy/error-fns': 1.3.7
       '@ehmpathy/uni-time': 1.9.1
       domain-glossary-procedure: 1.0.0
-      type-fns: 1.21.2
+      type-fns: 1.21.3
 
   simple-log-methods@0.6.9:
     dependencies:
@@ -10726,6 +10741,17 @@ snapshots:
       iso-time: 1.11.7
       type-fns: 1.21.0
 
+  simple-on-disk-cache@1.7.10:
+    dependencies:
+      domain-objects: 0.31.13
+      hash-fns: 1.1.0
+      helpful-errors: 1.7.3
+      iso-time: 1.11.7
+      serde-fns: 1.3.1
+      simple-in-memory-cache: 0.4.2
+      type-fns: 1.21.2
+      with-bottleneck: 0.1.1
+
   simple-on-disk-cache@1.7.3:
     dependencies:
       '@aws-sdk/client-s3': 3.954.0
@@ -10735,21 +10761,10 @@ snapshots:
       hash-fns: 1.1.0
       helpful-errors: 1.5.3
       serde-fns: 1.3.1
-      simple-in-memory-cache: 0.4.0
+      simple-in-memory-cache: 0.4.2
       type-fns: 1.21.0
     transitivePeerDependencies:
       - aws-crt
-
-  simple-on-disk-cache@1.7.9:
-    dependencies:
-      '@ehmpathy/uni-time': 1.9.1
-      domain-objects: 0.31.9
-      hash-fns: 1.1.0
-      helpful-errors: 1.7.3
-      serde-fns: 1.3.1
-      simple-in-memory-cache: 0.4.0
-      type-fns: 1.21.2
-      with-bottleneck: 0.1.1
 
   slash@3.0.0: {}
 
@@ -11031,6 +11046,11 @@ snapshots:
       domain-objects: 0.31.10
       helpful-errors: 1.7.3
 
+  type-fns@1.21.3:
+    dependencies:
+      domain-objects: 0.31.10
+      helpful-errors: 1.7.3
+
   typescript@5.4.5: {}
 
   typescript@5.9.3: {}
@@ -11164,9 +11184,9 @@ snapshots:
       '@ehmpathy/uni-time': 1.9.1
       procedure-fns: 1.0.1
       serde-fns: 1.3.1
-      simple-in-memory-cache: 0.4.0
-      simple-on-disk-cache: 1.7.9
-      type-fns: 1.21.2
+      simple-in-memory-cache: 0.4.2
+      simple-on-disk-cache: 1.7.10
+      type-fns: 1.21.3
 
   with-simple-cache@0.15.3(@huggingface/transformers@4.2.0)(@tensorflow/tfjs@4.22.0(seedrandom@3.0.5))(@types/node@22.15.21)(zod@4.3.4):
     dependencies:
@@ -11175,8 +11195,8 @@ snapshots:
       helpful-errors: 1.5.3
       procedure-fns: 1.0.1
       serde-fns: 1.3.1
-      simple-in-memory-cache: 0.4.0
-      simple-on-disk-cache: 1.7.9
+      simple-in-memory-cache: 0.4.2
+      simple-on-disk-cache: 1.7.10
       type-fns: 1.21.0
     transitivePeerDependencies:
       - '@huggingface/transformers'
@@ -11190,9 +11210,9 @@ snapshots:
     dependencies:
       '@ehmpathy/uni-time': 1.9.1
       serde-fns: 1.3.1
-      simple-in-memory-cache: 0.4.0
-      simple-on-disk-cache: 1.7.9
-      type-fns: 1.21.2
+      simple-in-memory-cache: 0.4.2
+      simple-on-disk-cache: 1.7.10
+      type-fns: 1.21.3
       visualogic: 1.3.3
 
   with-simple-caching@0.14.4:
@@ -11200,9 +11220,9 @@ snapshots:
       '@ehmpathy/uni-time': 1.9.1
       procedure-fns: 1.0.1
       serde-fns: 1.3.1
-      simple-in-memory-cache: 0.4.0
-      simple-on-disk-cache: 1.7.9
-      type-fns: 1.21.2
+      simple-in-memory-cache: 0.4.2
+      simple-on-disk-cache: 1.7.10
+      type-fns: 1.21.3
 
   word-wrap@1.2.5: {}
 
