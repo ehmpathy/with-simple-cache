@@ -1,4 +1,4 @@
-import type { UniDuration } from '@ehmpathy/uni-time';
+import type { IsoDuration } from 'iso-time';
 
 /**
  * a simple cache which synchronously gets and sets values to its store
@@ -8,7 +8,7 @@ export interface SimpleSyncCache<T> {
   set: (
     key: string,
     value: T | undefined,
-    options?: { expiration?: UniDuration | null },
+    options?: { expiration?: IsoDuration | null },
   ) => void;
 }
 
@@ -20,7 +20,7 @@ export interface SimpleAsyncCache<T> {
   set: (
     key: string,
     value: T | undefined,
-    options?: { expiration?: UniDuration | null },
+    options?: { expiration?: IsoDuration | null },
   ) => Promise<void>;
 }
 

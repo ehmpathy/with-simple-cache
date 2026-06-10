@@ -1,4 +1,4 @@
-import { UniDuration } from '@ehmpathy/uni-time';
+import { IsoDuration } from 'iso-time';
 
 import { SimpleAsyncCache, SimpleSyncCache } from '@src/domain.objects/SimpleCache';
 
@@ -8,7 +8,7 @@ export const createExampleSyncCache = () => {
     set: (
       key: string,
       value: any,
-      options?: { expiration?: UniDuration | null },
+      options?: { expiration?: IsoDuration | null },
     ) => {
       store[key] = options ? { value, options } : { value };
     },
@@ -23,7 +23,7 @@ export const createExampleAsyncCache = <T>() => {
     set: async (
       key: string,
       value: T | undefined,
-      options?: { expiration?: UniDuration | null },
+      options?: { expiration?: IsoDuration | null },
     ) => {
       // eslint-disable-next-line no-nested-ternary
       store[key] =
@@ -47,7 +47,7 @@ export const createExampleSyncCacheWithUri = <T>(baseUri: string) => {
     set: (
       key: string,
       value: T | undefined,
-      options?: { expiration?: UniDuration | null },
+      options?: { expiration?: IsoDuration | null },
     ) => {
       // eslint-disable-next-line no-nested-ternary
       store[key] =
@@ -72,7 +72,7 @@ export const createExampleSyncCacheWithoutUri = <T>() => {
     set: (
       key: string,
       value: T | undefined,
-      options?: { expiration?: UniDuration | null },
+      options?: { expiration?: IsoDuration | null },
     ) => {
       // eslint-disable-next-line no-nested-ternary
       store[key] =
@@ -96,7 +96,7 @@ export const createExampleAsyncCacheWithUri = <T>(baseUri: string) => {
     set: async (
       key: string,
       value: T | undefined,
-      options?: { expiration?: UniDuration | null },
+      options?: { expiration?: IsoDuration | null },
     ) => {
       // eslint-disable-next-line no-nested-ternary
       store[key] =
@@ -121,7 +121,7 @@ export const createExampleAsyncCacheWithoutUri = <T>() => {
     set: async (
       key: string,
       value: T | undefined,
-      options?: { expiration?: UniDuration | null },
+      options?: { expiration?: IsoDuration | null },
     ) => {
       // eslint-disable-next-line no-nested-ternary
       store[key] =

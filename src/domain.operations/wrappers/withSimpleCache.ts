@@ -1,5 +1,5 @@
-import type { UniDuration } from '@ehmpathy/uni-time';
 import { UnexpectedCodePathError } from 'helpful-errors';
+import type { IsoDuration } from 'iso-time';
 import { isNotUndefined, type NotUndefined } from 'type-fns';
 
 import type { HasCacheUri, SimpleCache } from '@src/domain.objects/SimpleCache';
@@ -121,7 +121,7 @@ export interface WithSimpleCacheOptions<
    *
    * @default undefined (cache decides)
    */
-  expiration?: UniDuration | null;
+  expiration?: IsoDuration | null;
 
   /**
    * whether to bypass the cache for get or set operations

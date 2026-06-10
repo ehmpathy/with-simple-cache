@@ -5,12 +5,12 @@ import { withSimpleCache } from './withSimpleCache';
 /**
  * type tests for expiration option type
  *
- * verifies expiration accepts UniDuration or null
+ * verifies expiration accepts IsoDuration or null
  *
  * symmetric with withSimpleCacheAsync.expiration.type.test.ts per rule.require.wrapper-symmetry
  */
 describe('withSimpleCache.expiration.types', () => {
-  it('accepts UniDuration with seconds', () => {
+  it('accepts IsoDuration with seconds', () => {
     const cache: SimpleCache<number> = {
       get: () => 42,
       set: () => {},
@@ -22,7 +22,7 @@ describe('withSimpleCache.expiration.types', () => {
     });
   });
 
-  it('accepts UniDuration with minutes', () => {
+  it('accepts IsoDuration with minutes', () => {
     const cache: SimpleCache<number> = {
       get: () => 42,
       set: () => {},
@@ -34,7 +34,7 @@ describe('withSimpleCache.expiration.types', () => {
     });
   });
 
-  it('accepts UniDuration with hours', () => {
+  it('accepts IsoDuration with hours', () => {
     const cache: SimpleCache<number> = {
       get: () => 42,
       set: () => {},

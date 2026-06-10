@@ -1,4 +1,4 @@
-import type { UniDuration } from '@ehmpathy/uni-time';
+import type { IsoDuration } from 'iso-time';
 import type { ProcedureInput } from 'procedure-fns';
 import {
   asSerialJSON,
@@ -26,7 +26,7 @@ export const withSimpleCacheOnDisk = <
       name: string;
       version: string | null;
     };
-    expiration?: UniDuration | null;
+    expiration?: IsoDuration | null;
     directory: ProcedureInput<typeof createCache>['directory'];
   },
 ) => {
