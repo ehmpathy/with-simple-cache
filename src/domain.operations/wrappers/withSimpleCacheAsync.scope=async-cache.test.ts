@@ -140,8 +140,7 @@ describe('withSimpleCacheAsync.scope=async-cache', () => {
     // define an example fn
     const expectedError = new Error('surprise!');
     const callApi = withSimpleCacheAsync(
-      // eslint-disable-next-line no-empty-pattern
-      async ({}: { name: string }) => {
+      async (_input: { name: string }) => {
         throw expectedError;
       },
       { cache },
