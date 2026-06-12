@@ -1,7 +1,7 @@
 import { getError } from 'test-fns';
 
 import { createExampleAsyncCache } from '@src/.test.assets/createExampleCache';
-import type { SimpleAsyncCache } from '@src/domain.objects/SimpleCache';
+import type { SimpleCacheAsync } from '@src/domain.objects/SimpleCache';
 import { BadRequestError } from '@src/utils/errors/BadRequestError';
 
 import { withExtendableCacheAsync } from './withExtendableCacheAsync';
@@ -106,7 +106,7 @@ describe('withExtendableCacheAsync', () => {
       const callApi = withExtendableCacheAsync(
         async (
           { galaxy }: { galaxy: string },
-          context: { cache: SimpleAsyncCache<string> },
+          context: { cache: SimpleCacheAsync<string> },
         ) => {
           apiCalls.push(galaxy);
           return Math.random();
@@ -237,7 +237,7 @@ describe('withExtendableCacheAsync', () => {
       const callApi = withExtendableCacheAsync(
         async (
           { galaxy }: { galaxy: string },
-          context: { cache: SimpleAsyncCache<string> },
+          context: { cache: SimpleCacheAsync<string> },
         ) => {
           apiCalls.push(galaxy);
           return Math.random();

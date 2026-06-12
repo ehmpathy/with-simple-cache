@@ -1,8 +1,8 @@
 export type {
   HasCacheUri,
-  SimpleAsyncCache,
   SimpleCache,
-  SimpleSyncCache,
+  SimpleCacheAsync,
+  SimpleCacheSync,
   WithCacheUri,
 } from './domain.objects/SimpleCache';
 export type {

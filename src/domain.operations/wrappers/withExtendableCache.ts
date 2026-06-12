@@ -1,6 +1,6 @@
 import { isAFunction } from 'type-fns';
 
-import type { SimpleSyncCache } from '@src/domain.objects/SimpleCache';
+import type { SimpleCacheSync } from '@src/domain.objects/SimpleCache';
 import { getCacheFromCacheChoiceOrFromForKeyArgs } from '@src/domain.operations/options/getCacheFromCacheChoiceOrFromForKeyArgs';
 import {
   hasForInputProperty,
@@ -31,7 +31,7 @@ export interface LogicWithExtendableCache<
   /**
    * the type of cache being used
    */
-  C extends SimpleSyncCache<any>,
+  C extends SimpleCacheSync<any>,
 > {
   /**
    * execute the logic with cache
@@ -132,7 +132,7 @@ export const withExtendableCache = <
   /**
    * the cache type
    */
-  C extends SimpleSyncCache<any>,
+  C extends SimpleCacheSync<any>,
 >(
   logic: L,
   options: WithSimpleCacheOptions<L, C>,

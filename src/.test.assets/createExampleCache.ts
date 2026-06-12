@@ -1,10 +1,10 @@
 import { IsoDuration } from 'iso-time';
 
-import { SimpleAsyncCache, SimpleSyncCache } from '@src/domain.objects/SimpleCache';
+import { SimpleCacheAsync, SimpleCacheSync } from '@src/domain.objects/SimpleCache';
 
 export const createExampleSyncCache = () => {
   const store: Record<string, any> = {};
-  const cache: SimpleSyncCache<any> = {
+  const cache: SimpleCacheSync<any> = {
     set: (
       key: string,
       value: any,
@@ -19,7 +19,7 @@ export const createExampleSyncCache = () => {
 
 export const createExampleAsyncCache = <T>() => {
   const store: Record<string, { value: T; options?: any } | undefined> = {};
-  const cache: SimpleAsyncCache<T> = {
+  const cache: SimpleCacheAsync<T> = {
     set: async (
       key: string,
       value: T | undefined,
@@ -43,7 +43,7 @@ export const createExampleAsyncCache = <T>() => {
  */
 export const createExampleSyncCacheWithUri = <T>(baseUri: string) => {
   const store: Record<string, { value: T; options?: any } | undefined> = {};
-  const cache: SimpleSyncCache<T> & { uri: (key: string) => string } = {
+  const cache: SimpleCacheSync<T> & { uri: (key: string) => string } = {
     set: (
       key: string,
       value: T | undefined,
@@ -68,7 +68,7 @@ export const createExampleSyncCacheWithUri = <T>(baseUri: string) => {
  */
 export const createExampleSyncCacheWithoutUri = <T>() => {
   const store: Record<string, { value: T; options?: any } | undefined> = {};
-  const cache: SimpleSyncCache<T> = {
+  const cache: SimpleCacheSync<T> = {
     set: (
       key: string,
       value: T | undefined,
@@ -92,7 +92,7 @@ export const createExampleSyncCacheWithoutUri = <T>() => {
  */
 export const createExampleAsyncCacheWithUri = <T>(baseUri: string) => {
   const store: Record<string, { value: T; options?: any } | undefined> = {};
-  const cache: SimpleAsyncCache<T> & { uri: (key: string) => string } = {
+  const cache: SimpleCacheAsync<T> & { uri: (key: string) => string } = {
     set: async (
       key: string,
       value: T | undefined,
@@ -117,7 +117,7 @@ export const createExampleAsyncCacheWithUri = <T>(baseUri: string) => {
  */
 export const createExampleAsyncCacheWithoutUri = <T>() => {
   const store: Record<string, { value: T; options?: any } | undefined> = {};
-  const cache: SimpleAsyncCache<T> = {
+  const cache: SimpleCacheAsync<T> = {
     set: async (
       key: string,
       value: T | undefined,

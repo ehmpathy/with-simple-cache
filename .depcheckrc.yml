@@ -25,3 +25,4 @@ ignores:
   - tsx
   - tsc-alias
   - yalc
+  - dpdm

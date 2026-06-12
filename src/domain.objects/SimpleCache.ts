@@ -3,7 +3,7 @@ import type { IsoDuration } from 'iso-time';
 /**
  * a simple cache which synchronously gets and sets values to its store
  */
-export interface SimpleSyncCache<T> {
+export interface SimpleCacheSync<T> {
   get: (key: string) => T | undefined;
   set: (
     key: string,
@@ -15,7 +15,7 @@ export interface SimpleSyncCache<T> {
 /**
  * a simple cache which asynchronously gets and sets values to its store
  */
-export interface SimpleAsyncCache<T> {
+export interface SimpleCacheAsync<T> {
   get: (key: string) => Promise<T | undefined>;
   set: (
     key: string,
@@ -27,7 +27,7 @@ export interface SimpleAsyncCache<T> {
 /**
  * a simple cache
  */
-export type SimpleCache<T> = SimpleAsyncCache<T> | SimpleSyncCache<T>;
+export type SimpleCache<T> = SimpleCacheAsync<T> | SimpleCacheSync<T>;
 
 /**
  * intersect any SimpleCache with uri resolution capability
