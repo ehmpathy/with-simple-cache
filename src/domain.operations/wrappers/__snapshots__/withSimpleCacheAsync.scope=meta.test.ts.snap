@@ -45,7 +45,7 @@ exports[`withSimpleCacheAsync.meta.types runtime behavior cache WITHOUT uri meth
 exports[`withSimpleCacheAsync.meta.types runtime behavior cache WITHOUT uri method should return direct value when meta: exclude 1`] = `42`;
 
 exports[`withSimpleCacheAsync.meta.types runtime behavior cache WITHOUT uri method should throw BadRequestError when meta: include (runtime guard) 1`] = `
-"BadRequestError: meta: 'include' requires cache with uri method. use meta: 'exclude' or provide a cache that implements uri(key)
+"BadRequestError: meta: 'include' requires a cache with a uri or version method. use meta: 'exclude' or provide a cache that implements uri(key) or version(key)
 
 {"cache":{}}}"
 `;

@@ -1,0 +1,67 @@
+🦉 the way speaks for itself
+
+🗿 route.stone.set
+   ├─ stone = 5.1.execution.from_vision
+   ├─ passage = overruled
+   ├─ guard
+   │  ├─ artifacts
+   │  │   ├─ $route/5.1.execution.from_vision.yield.md
+   │  │   └─ src/**/*
+   │  ├─ reviews
+   │  │   ├─ r1: repo-rules (l1, 3/3)
+   │  │   │   ├─ exhausted
+   │  │   │   ├─ 0 blockers ✓
+   │  │   │   ├─ 0 nitpicks ✓
+   │  │   │   └─ review: 
+   │  │   ├─ r2: mech-failhides (l1, 3/3)
+   │  │   │   ├─ exhausted
+   │  │   │   ├─ 0 blockers ✓
+   │  │   │   ├─ 0 nitpicks ✓
+   │  │   │   └─ review: 
+   │  │   ├─ r3: mech-decode-friction (l1, 3/3)
+   │  │   │   ├─ exhausted
+   │  │   │   ├─ 0 blockers ✓
+   │  │   │   ├─ 0 nitpicks ✓
+   │  │   │   └─ review: 
+   │  │   ├─ r4: arch-opport-decomposition (l1, 4/4)
+   │  │   │   ├─ exhausted
+   │  │   │   ├─ 0 blockers ✓
+   │  │   │   ├─ 0 nitpicks ✓
+   │  │   │   └─ review: 
+   │  │   ├─ r5: arch-smell-scopeleaks (l1, 3/3)
+   │  │   │   ├─ exhausted
+   │  │   │   ├─ 0 blockers ✓
+   │  │   │   ├─ 0 nitpicks ✓
+   │  │   │   └─ review: 
+   │  │   ├─ r6: arch-hazards-maintenance (l1, 3/3)
+   │  │   │   ├─ exhausted
+   │  │   │   ├─ 0 blockers ✓
+   │  │   │   ├─ 0 nitpicks ✓
+   │  │   │   └─ review: 
+   │  │   ├─ r7: arch-hazards-behavior (l1, 3/3)
+   │  │   │   ├─ exhausted
+   │  │   │   ├─ 0 blockers ✓
+   │  │   │   ├─ 0 nitpicks ✓
+   │  │   │   └─ review: 
+   │  │   ├─ r8: behavior-intent-coverage (l1, 3/3)
+   │  │   │   ├─ exhausted
+   │  │   │   ├─ 0 blockers ✓
+   │  │   │   ├─ 0 nitpicks ✓
+   │  │   │   └─ review: 
+   │  │   ├─ r9: ergo-friction-hazards (l1, 3/3)
+   │  │   │   ├─ exhausted
+   │  │   │   ├─ 0 blockers ✓
+   │  │   │   ├─ 0 nitpicks ✓
+   │  │   │   └─ review: 
+   │  │   ├─ r10: enroll-impl-behavior-intent (l3, 1/3)
+   │  │   │   ├─ 💥 malfunction
+   │  │   │   └─ review: .behavior/v2026_07_07.atomic-cache/.reviews/peer/5.1.execution.from_vision._.review.i1.e63c704e8421fa59af.r10._.given.by_peer.enroll-impl-behavior-intent.md
+   │  │   └─ r11: enroll-impl-arch-defects (l3, 0/3)
+   │  │       ├─ 💥 malfunction
+   │  │       └─ review: .behavior/v2026_07_07.atomic-cache/.reviews/peer/5.1.execution.from_vision._.review.i1.e63c704e8421fa59af.r11._.given.by_peer.enroll-impl-arch-defects.md
+   │  └─ judges
+   │      └─ j1: $rhachet run --repo bhrain --skill route.stone.judge --mechanism reviewed? --stone $stone --route $route --allow-blockers 0 --allow-nitpicks 3
+   │          └─ finished 0.5s ✓
+   │
+   └─ the way continues, run
+      └─ rhx route.drive

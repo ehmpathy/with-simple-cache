@@ -1,9 +1,19 @@
 export type {
+  CacheableLogic,
+  CacheMetaChoice,
+  CacheMetaOutput,
+  HasCacheConditionals,
+  HasCacheMetaCapacity,
   HasCacheUri,
   SimpleCache,
   SimpleCacheAsync,
+  SimpleCacheCondition,
+  SimpleCacheGetOptions,
+  SimpleCacheSetOptions,
   SimpleCacheSync,
+  WithCacheConditionals,
   WithCacheUri,
+  WithSimpleCacheConditionOption,
 } from './domain.objects/SimpleCache';
 export type {
   SimpleCacheExtractionMethod,
@@ -24,3 +34,4 @@ export { withSimpleCache } from './domain.operations/wrappers/withSimpleCache';
 export type { WithSimpleCacheAsyncOptions } from './domain.operations/wrappers/withSimpleCacheAsync';
 export { withSimpleCacheAsync } from './domain.operations/wrappers/withSimpleCacheAsync';
 export { withSimpleCacheOnDisk } from './domain.operations/wrappers/withSimpleCacheOnDisk';
+export { SimpleCacheConditionError } from './utils/errors/SimpleCacheConditionError';

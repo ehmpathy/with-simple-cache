@@ -1,0 +1,68 @@
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
+
+exports[`withSimpleCache.scope=conditionals runtime behavior given: a condition passed to a non-conditional cache (type gate bypassed) when: the runtime cache lacks a version method then: the wrapper throws BadRequestError (fail loud, not a silent no-op) 1`] = `
+"BadRequestError: condition requires a cache with a version method (conditional-write capability). provide a cache that implements version(key), or remove the condition option
+
+{"cache":{}}}"
+`;
+
+exports[`withSimpleCache.scope=conditionals runtime behavior given: a conditional cache and a compare-and-set write (condition.version: token) when: the current version does not match the token then: exception: throw (default) surfaces SimpleCacheConditionError 1`] = `
+"✋ SimpleCacheConditionError: cache condition failed: version mismatch
+
+{
+  "key": "rec",
+  "condition": {
+    "version": "v-stale"
+  },
+  "found": "v1"
+}"
+`;
+
+exports[`withSimpleCache.scope=conditionals runtime behavior given: a conditional cache and a put-if-absent write (condition.version: null) when: the key already exists (a writer beat us to it) then: exception: throw (default) surfaces SimpleCacheConditionError 1`] = `
+"✋ SimpleCacheConditionError: cache condition failed: expected key to be absent
+
+{
+  "key": "lock",
+  "condition": {
+    "version": null
+  },
+  "found": "v1"
+}"
+`;
+
+exports[`withSimpleCache.scope=conditionals runtime behavior given: condition and meta: include together (the primary use case) when: a compare-and-set write bumps the version then: cached.version reflects the bumped version 1`] = `
+"{
+  "output": "v2-value",
+  "cached": {
+    "version": "v2"
+  }
+}"
+`;
+
+exports[`withSimpleCache.scope=conditionals runtime behavior given: condition and meta: include together (the primary use case) when: a put-if-absent write succeeds then: cached.version reflects the newly minted version 1`] = `
+"{
+  "output": "first",
+  "cached": {
+    "version": "v1"
+  }
+}"
+`;
+
+exports[`withSimpleCache.scope=conditionals runtime behavior given: meta: include surfaces the version (tier 2) when: the cache has both uri and conditionals then: cached is { uri, version } 1`] = `
+"{
+  "output": 42,
+  "cached": {
+    "uri": "s3://bucket/prefix/abc",
+    "version": "v1"
+  }
+}"
+`;
+
+exports[`withSimpleCache.scope=conditionals runtime behavior given: meta: include surfaces the version (tier 2) when: the cache has conditionals only then: cached is { version } 1`] = `
+"{
+  "output": 42,
+  "cached": {
+    "version": "v1"
+  }
+}"
+`;

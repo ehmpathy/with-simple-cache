@@ -2,7 +2,13 @@ import { UnexpectedCodePathError } from 'helpful-errors';
 import type { IsoDuration } from 'iso-time';
 import { isNotUndefined, type NotUndefined } from 'type-fns';
 
-import type { HasCacheUri, SimpleCache } from '@src/domain.objects/SimpleCache';
+import type {
+  CacheMetaChoice,
+  CacheMetaOutput,
+  HasCacheConditionals,
+  SimpleCache,
+  WithSimpleCacheConditionOption,
+} from '@src/domain.objects/SimpleCache';
 import {
   getCacheFromCacheChoice,
   type WithSimpleCacheChoice,
@@ -16,27 +22,21 @@ import {
   noOp,
 } from '@src/domain.operations/serde/defaults';
 import { BadRequestError } from '@src/utils/errors/BadRequestError';
+import { SimpleCacheConditionError } from '@src/utils/errors/SimpleCacheConditionError';
 
 export type CacheableLogicSync = (...args: any[]) => any;
-
-/**
- * allowed meta values depend on whether cache has uri method
- *
- * 'include' is only available when cache has uri method
- */
-type MetaValue<C extends SimpleCache<any>> =
-  HasCacheUri<C> extends true ? 'include' | 'exclude' : 'exclude';
 
 /**
  * return type depends on meta value
  */
 type WithMetaReturn<
   L extends CacheableLogicSync,
+  C extends SimpleCache<any>,
   M extends 'include' | 'exclude' | undefined,
 > = M extends 'include'
   ? (...args: Parameters<L>) => {
       output: ReturnType<L>;
-      cached: { uri: string };
+      cached: CacheMetaOutput<C>;
     }
   : L;
 
@@ -55,7 +55,7 @@ export interface WithSimpleCacheOptions<
   /**
    * whether to include cache metadata in the return value
    */
-  M extends MetaValue<C> | undefined = undefined,
+  M extends CacheMetaChoice<C> | undefined = undefined,
 > {
   /**
    * the cache to persist outputs
@@ -154,12 +154,24 @@ export interface WithSimpleCacheOptions<
    * whether to include cache metadata in the return value
    *
    * - 'exclude' (default): returns the logic's return value directly
-   * - 'include': returns { output, cached } where cached.uri is present if cache supports it
+   * - 'include': returns { output, cached } where cached.uri / cached.version are present per capability
    *
    * note
-   * - 'include' is only available when the cache has a uri method
+   * - 'include' is only available when the cache has a uri or conditional-write capability
    */
   meta?: M;
+
+  /**
+   * a version precondition that gates the cache set (atomic conditional write)
+   *
+   * note
+   * - available only when the cache HasCacheConditionals (a plain cache rejects it at compile time)
+   * - the get→compute→set flow calls cache.set(key, value, { condition }); a precondition miss
+   *   throws SimpleCacheConditionError, which `exception` governs (throw by default, or ignore + converge)
+   */
+  condition?: HasCacheConditionals<C> extends true
+    ? WithSimpleCacheConditionOption<L>
+    : never;
 }
 
 /**
@@ -186,7 +198,7 @@ export const withSimpleCache = <
   /**
    * whether to include cache metadata in the return value
    */
-  M extends MetaValue<C> | undefined = undefined,
+  M extends CacheMetaChoice<C> | undefined = undefined,
 >(
   logic: L,
   {
@@ -204,8 +216,18 @@ export const withSimpleCache = <
       set: defaultShouldBypassSetMethod,
     },
     meta,
+    condition,
   }: WithSimpleCacheOptions<L, C, M>,
-): WithMetaReturn<L, M> => {
+): WithMetaReturn<L, C, M> => {
+  // localize the version-precondition option
+  // why-types-lack: `condition` is typed via a generic conditional (`HasCacheConditionals<C> ? … : never`)
+  //   that TypeScript cannot narrow inside the wrapper body, so it reads as `never` here.
+  // correct-type: the plain option shape when present, else undefined.
+  // removal: drop this cast if the option type is refactored to be narrowable without the C-conditional.
+  const conditionOption = condition as
+    | WithSimpleCacheConditionOption<L>
+    | undefined;
+
   return ((...args: Parameters<L>): any => {
     // define key based on args the function was invoked with
     const key = serializeKey(args[0], args[1]);
@@ -213,10 +235,36 @@ export const withSimpleCache = <
     // define cache based on options
     const cache = getCacheFromCacheChoice({ forInput: args, cacheOption });
 
-    // runtime guard: meta: 'include' requires cache with uri method
-    if (meta === 'include' && typeof (cache as any).uri !== 'function') {
+    // capability view of the cache for runtime probes
+    // why-types-lack: the generic C is the base SimpleCache; the optional capability methods
+    //   (uri, version) live only on the WithCacheUri / WithCacheConditionals variants, so the base
+    //   type does not surface them — a cast is the only way to probe them at runtime.
+    // correct-type: a partial of the two optional capability accessors (no `any`).
+    // removal: drop this view once SimpleCache models uri()/version() as optional members.
+    const cacheCapabilities = cache as {
+      uri?: (key: string) => string;
+      // version can legitimately return undefined (key absent), per HasCacheConditionals
+      version?: (key: string) => string | undefined;
+    };
+
+    // runtime guard: meta: 'include' requires a cache with a uri or version method
+    if (
+      meta === 'include' &&
+      typeof cacheCapabilities.uri !== 'function' &&
+      typeof cacheCapabilities.version !== 'function'
+    ) {
       throw new BadRequestError(
-        "meta: 'include' requires cache with uri method. use meta: 'exclude' or provide a cache that implements uri(key)",
+        "meta: 'include' requires a cache with a uri or version method. use meta: 'exclude' or provide a cache that implements uri(key) or version(key)",
+        { cache },
+      );
+    }
+
+    // runtime guard: a condition precondition requires a conditionals-capable cache (version method)
+    // fails loud if the compile-time HasCacheConditionals gate was bypassed (e.g., via a cast or an
+    // extractor that returns a non-conditional cache); the atomic-write intent must not silently vanish
+    if (conditionOption && typeof cacheCapabilities.version !== 'function') {
+      throw new BadRequestError(
+        'condition requires a cache with a version method (conditional-write capability). provide a cache that implements version(key), or remove the condition option',
         { cache },
       );
     }
@@ -224,11 +272,12 @@ export const withSimpleCache = <
     // helper to wrap output when meta: 'include'
     const asOutput = (deserializedValue: ReturnType<L>) => {
       if (meta === 'include') {
-        const cachedUri =
-          typeof (cache as any).uri === 'function'
-            ? (cache as any).uri(key)
-            : undefined;
-        return { output: deserializedValue, cached: { uri: cachedUri } };
+        const cached: Record<string, string | undefined> = {};
+        if (typeof cacheCapabilities.uri === 'function')
+          cached.uri = cacheCapabilities.uri(key);
+        if (typeof cacheCapabilities.version === 'function')
+          cached.version = cacheCapabilities.version(key);
+        return { output: deserializedValue, cached };
       }
       return deserializedValue;
     };
@@ -246,9 +295,47 @@ export const withSimpleCache = <
     // guard: bypass cache.set if requested
     if (bypass.set?.(...args)) return asOutput(output);
 
-    // set the output to the cache
+    // compute the version precondition: a static token, or an extractor over the full input
+    const versionSpec = conditionOption?.version;
+    const conditionVersion =
+      typeof versionSpec === 'function' ? versionSpec(...args) : versionSpec;
+
+    // converge a conditional-write conflict per the exception mode (rethrow unless 'ignore')
+    const convergeOnWriteConflict = (error: unknown): ReturnType<L> => {
+      // rethrow any error that isn't a conditional-write conflict we own
+      if (!(conditionOption && error instanceof SimpleCacheConditionError))
+        throw error;
+      // exception: 'throw' (default) → propagate the conflict
+      if (conditionOption.exception !== 'ignore') throw error;
+      // exception: 'ignore' → re-read and return the winner's value to converge on it.
+      // fallback semantics: if the winner's value has already vanished by the time we re-read
+      // (e.g. the winner deleted the key, or its ttl expired in the race window), there is no
+      // winner to converge on — so we return our own freshly-computed output rather than undefined,
+      // which keeps the caller's result well-defined instead of a surprise miss
+      const winnerValue = cache.get(key);
+      return isNotUndefined(winnerValue)
+        ? deserializeValue(winnerValue)
+        : output;
+    };
+
+    // set the output to the cache (gated on the version precondition, if any)
     const serializedOutput = serializeValue(output);
-    cache.set(key, serializedOutput, { expiration });
+    try {
+      // why-types-lack: the base cache.set types its options `condition` slot as `never`, so a
+      //   real condition object does not fit the base signature.
+      // correct-type: the conditionals-capable set options (SimpleCacheSetOptions<SimpleCacheCondition>),
+      //   which the runtime cache honors here — guaranteed by the compile-time HasCacheConditionals gate.
+      // removal: drop this cast once the SimpleCache set signature is generic over its condition type.
+      cache.set(key, serializedOutput, {
+        expiration,
+        ...(conditionOption
+          ? { condition: { version: conditionVersion } }
+          : {}),
+      } as any);
+    } catch (error) {
+      // on a conditional-write conflict, converge per the exception mode
+      return asOutput(convergeOnWriteConflict(error));
+    }
 
     // if the output was undefined, we can just return here - no deserialization needed
     if (output === undefined) return asOutput(output);
@@ -263,5 +350,5 @@ export const withSimpleCache = <
       'cache.get returned undefined immediately after cache.set. cache implementation may be inconsistent',
       { key, output },
     );
-  }) as WithMetaReturn<L, M>;
+  }) as WithMetaReturn<L, C, M>;
 };
