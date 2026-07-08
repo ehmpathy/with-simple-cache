@@ -201,7 +201,7 @@ describe('withSimpleCache.scope=meta', () => {
         const error = getError(() => callApi({ id: 'test-123' }));
         expect(error).toBeInstanceOf(BadRequestError);
         expect(error.message).toContain(
-          "meta: 'include' requires cache with uri method",
+          "meta: 'include' requires a cache with a uri or version method",
         );
         expect(error.message).toMatchSnapshot();
       });

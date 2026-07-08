@@ -1,0 +1,267 @@
+🦉 the way speaks for itself
+
+🗿 route.stone.set
+   ├─ stone = 5.3.verification
+   ├─ passage = malfunction
+   ├─ reason = reviewer or judge malfunctioned
+   ├─ options
+   │  ├─ overrule the malfunction
+   │  │  └─ rhx route.stone.set --stone 5.3.verification --as overruled
+   │  └─ or fix the reviewer, then retry
+   └─ guard
+      ├─ artifacts
+      │   ├─ $route/5.3.verification.yield.md
+      │   └─ src/**/*
+      ├─ reviews
+      │   ├─ r1: repo-rules (l1, 3/3)
+      │   │   ├─ approved, cached
+      │   │   ├─ 0 blockers ✓
+      │   │   ├─ 0 nitpicks ✓
+      │   │   └─ review: .behavior/v2026_07_07.atomic-cache/.reviews/peer/5.3.verification._.review.i3.83f3561aec47e92e20.r1._.given.by_peer.repo-rules.md
+      │   ├─ r2: ergo-contract-snapshots (l1, 3/3)
+      │   │   ├─ approved, cached
+      │   │   ├─ 0 blockers ✓
+      │   │   ├─ 0 nitpicks ✓
+      │   │   └─ review: .behavior/v2026_07_07.atomic-cache/.reviews/peer/5.3.verification._.review.i3.83f3561aec47e92e20.r2._.given.by_peer.ergo-contract-snapshots.md
+      │   ├─ r3: mech-external-contracts (l1, 3/3)
+      │   │   ├─ approved, cached
+      │   │   ├─ 0 blockers ✓
+      │   │   ├─ 0 nitpicks ✓
+      │   │   └─ review: .behavior/v2026_07_07.atomic-cache/.reviews/peer/5.3.verification._.review.i3.83f3561aec47e92e20.r3._.given.by_peer.mech-external-contracts.md
+      │   ├─ r4: ergo-acceptance-journey-coverage (l1, 3/3)
+      │   │   ├─ approved, cached
+      │   │   ├─ 0 blockers ✓
+      │   │   ├─ 0 nitpicks ✓
+      │   │   └─ review: .behavior/v2026_07_07.atomic-cache/.reviews/peer/5.3.verification._.review.i3.83f3561aec47e92e20.r4._.given.by_peer.ergo-acceptance-journey-coverage.md
+      │   ├─ r5: ergo-snapshot-visual-blemishes (l1, 3/3)
+      │   │   ├─ approved, cached
+      │   │   ├─ 0 blockers ✓
+      │   │   ├─ 0 nitpicks ✓
+      │   │   └─ review: .behavior/v2026_07_07.atomic-cache/.reviews/peer/5.3.verification._.review.i3.83f3561aec47e92e20.r5._.given.by_peer.ergo-snapshot-visual-blemishes.md
+      │   ├─ r6: mech-given-when-then (l1, 3/3)
+      │   │   ├─ approved, cached
+      │   │   ├─ 0 blockers ✓
+      │   │   ├─ 0 nitpicks ✓
+      │   │   └─ review: .behavior/v2026_07_07.atomic-cache/.reviews/peer/5.3.verification._.review.i3.83f3561aec47e92e20.r6._.given.by_peer.mech-given-when-then.md
+      │   ├─ r7: mech-test-intent (l1, 3/3)
+      │   │   ├─ approved, cached
+      │   │   ├─ 0 blockers ✓
+      │   │   ├─ 0 nitpicks ✓
+      │   │   └─ review: .behavior/v2026_07_07.atomic-cache/.reviews/peer/5.3.verification._.review.i3.83f3561aec47e92e20.r7._.given.by_peer.mech-test-intent.md
+      │   ├─ r8: mech-test-scope-purity (l1, 0/3)
+      │   │   ├─ constraint 0.6s
+      │   │   ├─ 0 blockers ✓
+      │   │   ├─ 0 nitpicks ✓
+      │   │   └─ review: .behavior/v2026_07_07.atomic-cache/.reviews/peer/5.3.verification._.review.i4.83f3561aec47e92e20.r8._.given.by_peer.mech-test-scope-purity.md
+      │   ├─ r9: enroll-verif-snapshot-coverage (l3, 0/3)
+      │   │   ├─ 💥 malfunction
+      │   │   └─ review: .behavior/v2026_07_07.atomic-cache/.reviews/peer/5.3.verification._.review.i4.83f3561aec47e92e20.r9._.given.by_peer.enroll-verif-snapshot-coverage.md
+      │   ├─ r10: enroll-verif-snapshot-blemishes (l3, 0/3)
+      │   │   ├─ 💥 malfunction
+      │   │   └─ review: .behavior/v2026_07_07.atomic-cache/.reviews/peer/5.3.verification._.review.i4.83f3561aec47e92e20.r10._.given.by_peer.enroll-verif-snapshot-blemishes.md
+      │   └─ r11: enroll-verif-test-intent (l3, 0/3)
+      │       ├─ 💥 malfunction
+      │       └─ review: .behavior/v2026_07_07.atomic-cache/.reviews/peer/5.3.verification._.review.i4.83f3561aec47e92e20.r11._.given.by_peer.enroll-verif-test-intent.md
+      └─ judges
+          └─ j1: $rhachet run --repo bhrain --skill route.stone.judge --mechanism reviewed? --stone $stone --route $route --allow-blockers 0 --allow-nitpicks 0
+              └─ finished 0.5s ✓
+
+────────────────────────────────────────────────────────────────
+
+🔎 review 9
+   ├─ stdout
+   │  ├─
+   │  │
+   │  │  ## Review: Conditional-Write Feature — Snapshot Coverage & Journey Coverage
+   │  │  
+   │  │  ---
+   │  │  
+   │  │  ### Criterion 1: Snapshot coverage on contract endpoints
+   │  │  **(`rule.require.contract-snapshot-exhaustiveness`)**
+   │  │  
+   │  │  **What's present:** 6 snapshots per wrapper, 12 total, fully symmetric:
+   │  │  
+   │  │  | snapshot | content |
+   │  │  |---|---|
+   │  │  | put-if-absent conflict error | `✋ SimpleCacheConditionError: cache condition failed: expected key to be absent` + `{ key, condition: {version:null}, found }` |
+   │  │  | CAS stale-token error | `✋ SimpleCacheConditionError: cache condition failed: version mismatch` + `{ key, condition: {version:"v-stale"}, found }` |
+   │  │  | conditionals-only meta shape | `{ output: 42, cached: { version: "v1" } }` |
+   │  │  | uri+conditionals meta shape | `{ output: 42, cached: { uri: "s3://...", version: "v1" } }` |
+   │  │  | put-if-absent primary use case | `{ output: "first", cached: { version: "v1" } }` |
+   │  │  | CAS primary use case | `{ output: "v2-value", cached: { version: "v2" } }` |
+   │  │  
+   │  │  All snapshots are non-trivial with concrete captured values — reviewers can vibecheck error message wording, structured context fields, and output shape.
+   │  │  
+   │  │  **One gap:**
+   │  │  
+   │  │  The `BadRequestError` thrown when `condition` is passed to a non-conditional cache (the runtime guard) has no snapshot. That error message is a new contract surface — reviewers can't vibecheck its wording. This is a **nitpick**: the two primary failure-mode messages are snapshotted, and this guard is a secondary path, but exhaustiveness demands it.
+   │  │  
+   │  │  ---
+   │  │  
+   │  │  ### Criterion 2: Acceptance test user journey coverage
+   │  │  **(`rule.require.acceptance-journey-coverage`)**
+   │  │  
+   │  │  | user journey | sync | async |
+   │  │  |---|---|---|
+   │  │  | put-if-absent: absent key → write + mint version | ✅ | ✅ |
+   │  │  | put-if-absent: conflict → `SimpleCacheConditionError` | ✅ | ✅ |
+   │  │  | put-if-absent: `exception: 'ignore'` → converge on winner | ✅ | ✅ |
+   │  │  | CAS: matching token → write + bump version | ✅ | ✅ |
+   │  │  | CAS: stale token → `SimpleCacheConditionError` | ✅ | ✅ |
+   │  │  | CAS: `exception: 'ignore'` + stale token → converge on winner | ✅ | ✅ |
+   │  │  | `exception: 'ignore'` + winner vanished → fall back to own output | ✅ | ✅ |
+   │  │  | dynamic extractor returning `null` (put-if-absent via extraction) | ✅ | ✅ |
+   │  │  | `condition` + `bypass.set` orthogonality | ✅ | ✅ |
+   │  │  | `meta: 'include'` surfaces `version` (conditionals-only tier) | ✅ | ✅ |
+   │  │  | `meta: 'include'` surfaces `version` + `uri` (uri+conditionals tier) | ✅ | ✅ |
+   │  │  | `meta: 'include'` + `condition` primary use case | ✅ | ✅ |
+   │  │  | non-conditional cache + `condition` → `BadRequestError` (fail-loud) | ✅ | ✅ |
+   │  │  | inline extractor (validates type inference without annotation) | ✅ | ✅ |
+   │  │  | type contract: plain `SimpleCache` not assignable as conditional | ✅ | ✅ |
+   │  │  | **concurrent writes force independent execution (dedup bypass)** | N/A | ✅ |
+   │  │  
+   │  │  All journeys covered. The async-specific dedup-bypass scenario is legitimately asymmetric — deduplication is an async-only feature and does not violate `rule.require.wrapper-symmetry`.
+   │  │  
+   │  │  ---
+   │  │  
+   │  │  ### Verdict
+   │  │  
+   │  │  | criterion | result | notes |
+   │  │  |---|---|---|
+   │  │  | snapshot coverage | **pass** (1 nitpick) | missing snapshot on `BadRequestError` guard message |
+   │  │  | journey coverage | **pass** | all journeys covered, dedup-bypass journey is a solid addition |
+   │  │
+   │  └─
+   ├─ stderr
+   │  ├─
+   │  │
+   │  │  Warning: no stdin data received in 3s, proceeding without it. If piping from a slow command, redirect stdin explicitly: < /dev/null to skip, or wait longer.
+   │  │  
+   │  │  💥 malfunction: reviewer output lacks a numeric blocker/nitpick count (expected `N blockers` and `N nitpicks`; use `0 blockers` / `0 nitpicks` to declare clean). see .agent/repo=bhrain/role=reviewer/briefs/contract.reviewer-output.md
+   │  │
+   │  └─
+   └─ passage blocked
+      ├─ blocked by malfunction
+      └─ exit code: 1 💥
+
+🔎 review 10
+   ├─ stdout
+   │  ├─
+   │  │
+   │  │  Here are the blemishes found in the snapshotted acceptance test journeys:
+   │  │  
+   │  │  ---
+   │  │  
+   │  │  **1. ✋ emoji inconsistency between error types**
+   │  │  
+   │  │  `SimpleCacheConditionError` snapshots prefix with `✋`:
+   │  │  ```
+   │  │  ✋ SimpleCacheConditionError: cache condition failed: version mismatch
+   │  │  ```
+   │  │  
+   │  │  But `BadRequestError` snapshots do not:
+   │  │  ```
+   │  │  BadRequestError: meta: 'include' requires a cache with a uri or version method...
+   │  │  ```
+   │  │  
+   │  │  A reader scanning multiple error snapshots will see inconsistent visual treatment. Either all error snapshots should have the emoji prefix, or none should.
+   │  │  
+   │  │  ---
+   │  │  
+   │  │  **2. JSON metadata formatting inconsistency**
+   │  │  
+   │  │  `SimpleCacheConditionError` metadata is pretty-printed:
+   │  │  ```json
+   │  │  {
+   │  │    "key": "rec",
+   │  │    "condition": {
+   │  │      "version": "v-stale"
+   │  │    },
+   │  │    "found": "v1"
+   │  │  }
+   │  │  ```
+   │  │  
+   │  │  `BadRequestError` metadata is compact inline:
+   │  │  ```
+   │  │  BadRequestError: ... implements uri(key) or version(key)
+   │  │  
+   │  │  {"cache":{}}
+   │  │  ```
+   │  │  
+   │  │  Same error rendering mechanism, different output format. This may be a difference in how `helpful-errors` formats the two subclasses, but visually it's jarring when reviewing snapshot diffs side by side.
+   │  │  
+   │  │  ---
+   │  │  
+   │  │  **3. `"found"` field name is ambiguous**
+   │  │  
+   │  │  ```json
+   │  │  "found": "v1"
+   │  │  ```
+   │  │  
+   │  │  `found` reads as "was the key found?" (boolean expectation) rather than "what version token was found". The intent is the version token. A clearer name would be `"versionFound"` (noun-adj order per the codebase convention) or simply `"version"` to parallel the `"condition": { "version": ... }` sibling.
+   │  │  
+   │  │  ---
+   │  │  
+   │  │  **4. `"v-stale"` naming deviates from convention**
+   │  │  
+   │  │  In the version mismatch snapshot:
+   │  │  ```json
+   │  │  "condition": {
+   │  │    "version": "v-stale"
+   │  │  }
+   │  │  ```
+   │  │  
+   │  │  All other version tokens in the same snapshots use the `"v1"` / `"v2"` pattern. `"v-stale"` is a semantically descriptive name chosen for readability in the mismatch scenario, but it creates a naming inconsistency. The reader has to recognize it as a test fixture value rather than a real format example. Consider `"v0"` (stale predecessor) or keep `"v-stale"` but document the intent in a comment near the test.
+   │  │  
+   │  │  ---
+   │  │  
+   │  │  **Summary by severity:**
+   │  │  
+   │  │  | # | blemish | severity |
+   │  │  |---|---------|----------|
+   │  │  | 1 | ✋ emoji on `SimpleCacheConditionError` but not `BadRequestError` | nitpick |
+   │  │  | 2 | pretty-printed vs compact JSON metadata across error types | nitpick |
+   │  │  | 3 | `"found"` field name ambiguous — should be `"versionFound"` | nitpick |
+   │  │  | 4 | `"v-stale"` deviates from `"v1"`/`"v2"` convention | nitpick |
+   │  │  
+   │  │  All four are aesthetic / readability issues with no behavioral impact. #3 is the closest to a blocker since `SimpleCacheConditionError` is a public API and the field name ships in the error metadata that callers inspect.
+   │  │
+   │  └─
+   ├─ stderr
+   │  ├─
+   │  │
+   │  │  Warning: no stdin data received in 3s, proceeding without it. If piping from a slow command, redirect stdin explicitly: < /dev/null to skip, or wait longer.
+   │  │  
+   │  │  💥 malfunction: reviewer output lacks a numeric blocker/nitpick count (expected `N blockers` and `N nitpicks`; use `0 blockers` / `0 nitpicks` to declare clean). see .agent/repo=bhrain/role=reviewer/briefs/contract.reviewer-output.md
+   │  │
+   │  └─
+   └─ passage blocked
+      ├─ blocked by malfunction
+      └─ exit code: 1 💥
+
+🔎 review 11
+   ├─ stdout
+   │  ├─
+   │  │
+   │  │  **PASS — no test intent violations detected.**
+   │  │  
+   │  │  All test changes on this branch fall into two categories:
+   │  │  
+   │  │  1. **Benign refactors** — tests moved from monolithic `*.test.ts` files into scope-specific `*.scope=X.test.ts` files with identical assertions. Cross-verified each removed describe block against the new scope file.
+   │  │  
+   │  │  2. **New test files** — tests for the new `meta` and `condition` features. All assertions are strong and specific: `toEqual(...)` with exact shapes, `toBeInstanceOf(BadRequestError)`, `toContain(...)` on error messages, snapshot assertions with concrete values, and `@ts-expect-error` type-level proofs.
+   │  │  
+   │  │  No assertions were loosened, removed without replacement, or weakened. No snapshots were softened. No blockers.
+   │  │
+   │  └─
+   ├─ stderr
+   │  ├─
+   │  │
+   │  │  Warning: no stdin data received in 3s, proceeding without it. If piping from a slow command, redirect stdin explicitly: < /dev/null to skip, or wait longer.
+   │  │  
+   │  │  💥 malfunction: reviewer output lacks a numeric blocker/nitpick count (expected `N blockers` and `N nitpicks`; use `0 blockers` / `0 nitpicks` to declare clean). see .agent/repo=bhrain/role=reviewer/briefs/contract.reviewer-output.md
+   │  │
+   │  └─
+   └─ passage blocked
+      ├─ blocked by malfunction
+      └─ exit code: 1 💥
