@@ -12,6 +12,7 @@
     "**/*.test.ts", // all explicitly .test files are dev only assets too
     "**/*.test.js",
     "**/.test/**/*",
+    "**/.test.assets/**/*", // dev-only test fixtures, never shipped to dist
     "**/.scratch/**/*",
     "**/__test*__/**/*" // todo: deprecate this pattern in favor of .test
   ]

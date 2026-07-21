@@ -148,6 +148,19 @@ export type HasCacheUri<C> = C extends { uri: (key: string) => string }
  * - gate a set on a version precondition (throws SimpleCacheConditionError on mismatch)
  *
  * this mirrors WithCacheUri — the package defines the vocabulary, each backend supplies the impl
+ *
+ * cross-package contract (the wrapper leans on this for convergence)
+ * - the wrapper recognizes a backend's conflict *structurally*, by name, not by `instanceof` (which
+ *   fails across a package boundary): the thrown error's runtime class name must be exactly
+ *   `SimpleCacheConditionError` AND some ancestor in its prototype chain must be named `ConstraintError`
+ *   (from helpful-errors). a backend that names its error differently, or whose error does not descend
+ *   from ConstraintError, will not converge — the wrapper re-throws instead
+ * - so a conformant backend either re-throws *our* exported `SimpleCacheConditionError`, or throws its
+ *   own ConstraintError subclass named `SimpleCacheConditionError`. this is doc-enforced today; a
+ *   registered-symbol brand on helpful-errors is the planned compile-safe replacement
+ * - a caller who uses `exception: 'throw'` and wants to recognize a re-thrown conflict cross-package
+ *   should use the exported `isSimpleCacheConditionError` predicate, not `instanceof` (which fails
+ *   across the boundary for the same reason the wrapper's own guard cannot use it)
  */
 export type WithCacheConditionals<TCache extends SimpleCache<any>> =
   TCache extends SimpleCacheAsync<infer T>

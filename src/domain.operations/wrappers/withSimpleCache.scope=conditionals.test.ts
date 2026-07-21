@@ -5,12 +5,14 @@ import {
   createExampleSyncCacheWithConditionals,
   createExampleSyncCacheWithUriAndConditionals,
 } from '@src/.test.assets/createExampleCache';
+import { ForeignSimpleCacheConditionError } from '@src/.test.assets/ForeignSimpleCacheConditionError';
 import type {
   SimpleCache,
   SimpleCacheSync,
   WithCacheConditionals,
 } from '@src/domain.objects/SimpleCache';
 import { BadRequestError } from '@src/utils/errors/BadRequestError';
+import { isSimpleCacheConditionError } from '@src/utils/errors/isSimpleCacheConditionError';
 import { SimpleCacheConditionError } from '@src/utils/errors/SimpleCacheConditionError';
 
 import { withSimpleCache } from './withSimpleCache';
@@ -420,6 +422,38 @@ describe('withSimpleCache.scope=conditionals', () => {
           });
         });
       });
+
+      when('a put-if-absent write loses the race (converge)', () => {
+        then(
+          'the loser response carries the winner value and the winner version',
+          () => {
+            const { cache } = createExampleSyncCacheWithConditionals<string>();
+            cache.set('lock', 'held-by-winner'); // seed the winner
+            const winnerVersion = cache.version('lock');
+
+            const callApi = withSimpleCache(
+              (_input: { id: string }) => 'loser-output',
+              {
+                cache,
+                serialize: { key: (input) => input.id },
+                bypass: { get: () => true },
+                meta: 'include',
+                condition: { version: null, exception: 'ignore' },
+              },
+            );
+
+            const result = callApi({ id: 'lock' });
+
+            // converge: the loser observes the winner value, and cached.version reflects the
+            // winner's live version (meta re-reads cache.version after convergence)
+            expect(result).toEqual({
+              output: 'held-by-winner',
+              cached: { version: winnerVersion },
+            });
+            expect(JSON.stringify(result, null, 2)).toMatchSnapshot();
+          },
+        );
+      });
     });
 
     given(
@@ -514,6 +548,174 @@ describe('withSimpleCache.scope=conditionals', () => {
               // the winner vanished, so the loser converges on its own output as the fallback
               expect(result).toEqual('loser-output');
             });
+          },
+        );
+      },
+    );
+
+    given(
+      'a cross-package conflict (the backend throws a foreign SimpleCacheConditionError)',
+      () => {
+        when('exception: ignore and the winner value is present', () => {
+          then('the loser converges despite the foreign constructor', () => {
+            // a conditional cache whose set throws a SimpleCacheConditionError from a DIFFERENT
+            // constructor (as a separate package would), but whose get returns the winner value
+            const cache: WithCacheConditionals<SimpleCacheSync<string>> = {
+              get: () => 'winner-value',
+              set: () => {
+                throw new ForeignSimpleCacheConditionError(
+                  'cache condition failed: expected key to be absent',
+                  { note: 'thrown by a backend in another package' },
+                );
+              },
+              version: () => undefined,
+            };
+
+            // sanity: this foreign error is NOT an instance of our local class — instanceof would miss it
+            const foreignError = getError(() => cache.set('lock', 'x'));
+            expect(foreignError).not.toBeInstanceOf(SimpleCacheConditionError);
+
+            const callApi = withSimpleCache(
+              (_input: { id: string }) => 'loser-output',
+              {
+                cache,
+                serialize: { key: (input) => input.id },
+                bypass: { get: () => true }, // force a miss so we reach the conditional set (else a plain get-hit would short-circuit before the converge path)
+                condition: { version: null, exception: 'ignore' },
+              },
+            );
+
+            const result = callApi({ id: 'lock' });
+
+            // converge: the loser recognizes the foreign conflict and returns the winner value.
+            // this only equals 'winner-value' (not the logic's 'loser-output') if the set actually
+            // threw, was recognized, and the re-read converged — so it genuinely exercises the fix
+            expect(result).toEqual('winner-value');
+          });
+        });
+
+        when('exception: throw (default) and the conflict is foreign', () => {
+          then(
+            'the foreign conflict propagates (recognized, then re-thrown)',
+            () => {
+              const cache: WithCacheConditionals<SimpleCacheSync<string>> = {
+                get: () => undefined,
+                set: () => {
+                  throw new ForeignSimpleCacheConditionError(
+                    'cache condition failed: expected key to be absent',
+                    { note: 'thrown by a backend in another package' },
+                  );
+                },
+                version: () => undefined,
+              };
+
+              const callApi = withSimpleCache(
+                (_input: { id: string }) => 'loser-output',
+                {
+                  cache,
+                  serialize: { key: (input) => input.id },
+                  condition: { version: null },
+                },
+              );
+
+              const error = getError(() => callApi({ id: 'lock' }));
+              // the foreign instance is recognized, then re-thrown intact (same object)
+              expect(error).toBeInstanceOf(ForeignSimpleCacheConditionError);
+              // and its runtime class name is the discriminator the guard matches on
+              expect(error.constructor.name).toEqual(
+                'SimpleCacheConditionError',
+              );
+              // lock the rendered cross-package error message (HelpfulError renders the
+              // spoofed new.target.name prefix — the exact signal the guard keys on)
+              expect(error.message).toMatchSnapshot();
+            },
+          );
+
+          then(
+            'a caller that catches with instanceof SimpleCacheConditionError silently misses it (documented interim limitation)',
+            () => {
+              const cache: WithCacheConditionals<SimpleCacheSync<string>> = {
+                get: () => undefined,
+                set: () => {
+                  throw new ForeignSimpleCacheConditionError(
+                    'cache condition failed: expected key to be absent',
+                    { note: 'thrown by a backend in another package' },
+                  );
+                },
+                version: () => undefined,
+              };
+
+              const callApi = withSimpleCache(
+                (_input: { id: string }) => 'loser-output',
+                {
+                  cache,
+                  serialize: { key: (input) => input.id },
+                  condition: { version: null },
+                },
+              );
+
+              const error = getError(() => callApi({ id: 'lock' }));
+
+              // a caller's own `instanceof SimpleCacheConditionError` still fails across the package
+              // boundary — the same bug the wrapper's guard overcomes. this locks that so it is a
+              // documented boundary, not a silent trap. the fix for callers is the exported
+              // `isSimpleCacheConditionError` predicate (see its own test), which recognizes this error
+              expect(error).not.toBeInstanceOf(SimpleCacheConditionError);
+              // the exported predicate is the caller-safe recognition path
+              expect(isSimpleCacheConditionError(error)).toEqual(true);
+            },
+          );
+        });
+
+        when(
+          'exception: ignore and the backend bundled its own copy of helpful-errors',
+          () => {
+            then(
+              'the loser still converges: the name-based ancestry walk beats instanceof across the copy boundary',
+              () => {
+                // simulate a real separate-package backend: a ConstraintError with the same NAME
+                // but a different constructor identity than the one we import, so instanceof fails
+                class ForeignConstraintError extends Error {}
+                Object.defineProperty(ForeignConstraintError, 'name', {
+                  value: 'ConstraintError',
+                });
+                class DupCopyCondError extends ForeignConstraintError {}
+                Object.defineProperty(DupCopyCondError, 'name', {
+                  value: 'SimpleCacheConditionError',
+                });
+
+                const cache: WithCacheConditionals<SimpleCacheSync<string>> = {
+                  get: () => 'winner-value',
+                  set: () => {
+                    throw new DupCopyCondError(
+                      'cache condition failed: expected key to be absent',
+                    );
+                  },
+                  version: () => undefined,
+                };
+
+                // the thrown error is NOT an instance of our class — instanceof would miss it
+                const foreignError = getError(() => cache.set('lock', 'x'));
+                expect(foreignError).not.toBeInstanceOf(
+                  SimpleCacheConditionError,
+                );
+
+                const callApi = withSimpleCache(
+                  (_input: { id: string }) => 'loser-output',
+                  {
+                    cache,
+                    serialize: { key: (input) => input.id },
+                    bypass: { get: () => true }, // force a miss so we reach the conditional set (else a plain get-hit would short-circuit before the converge path)
+                    condition: { version: null, exception: 'ignore' },
+                  },
+                );
+
+                const result = callApi({ id: 'lock' });
+
+                // converge end-to-end through the wrapper, not just the predicate in isolation
+                expect(result).toEqual('winner-value');
+              },
+            );
           },
         );
       },

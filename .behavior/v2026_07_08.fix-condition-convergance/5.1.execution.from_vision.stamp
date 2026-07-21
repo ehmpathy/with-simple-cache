@@ -1,0 +1,75 @@
+🦉 the way speaks for itself
+
+🗿 route.stone.set
+   ├─ stone = 5.1.execution.from_vision
+   ├─ passage = overruled
+   ├─ guard
+   │  ├─ artifacts
+   │  │   ├─ $route/5.1.execution.from_vision.yield.md
+   │  │   └─ src/**/*
+   │  ├─ reviews
+   │  │   ├─ r1: repo-rules (l1, 3/3)
+   │  │   │   ├─ exhausted
+   │  │   │   ├─ 0 blockers ✓
+   │  │   │   ├─ 0 nitpicks ✓
+   │  │   │   └─ given: 
+   │  │   ├─ r2: mech-failhides (l1, 3/3)
+   │  │   │   ├─ exhausted
+   │  │   │   ├─ 0 blockers ✓
+   │  │   │   ├─ 0 nitpicks ✓
+   │  │   │   └─ given: 
+   │  │   ├─ r3: mech-decode-friction (l1, 3/3)
+   │  │   │   ├─ exhausted
+   │  │   │   ├─ 0 blockers ✓
+   │  │   │   ├─ 0 nitpicks ✓
+   │  │   │   └─ given: 
+   │  │   ├─ r4: arch-opport-decomposition (l1, 3/3)
+   │  │   │   ├─ exhausted
+   │  │   │   ├─ 0 blockers ✓
+   │  │   │   ├─ 0 nitpicks ✓
+   │  │   │   └─ given: 
+   │  │   ├─ r5: arch-smell-scopeleaks (l1, 3/3)
+   │  │   │   ├─ exhausted
+   │  │   │   ├─ 0 blockers ✓
+   │  │   │   ├─ 0 nitpicks ✓
+   │  │   │   └─ given: 
+   │  │   ├─ r6: arch-hazards-maintenance (l1, 3/3)
+   │  │   │   ├─ exhausted
+   │  │   │   ├─ 0 blockers ✓
+   │  │   │   ├─ 0 nitpicks ✓
+   │  │   │   └─ given: 
+   │  │   ├─ r7: arch-hazards-behavior (l1, 3/3)
+   │  │   │   ├─ exhausted
+   │  │   │   ├─ 0 blockers ✓
+   │  │   │   ├─ 0 nitpicks ✓
+   │  │   │   └─ given: 
+   │  │   ├─ r8: behavior-intent-coverage (l1, 3/3)
+   │  │   │   ├─ exhausted
+   │  │   │   ├─ 0 blockers ✓
+   │  │   │   ├─ 0 nitpicks ✓
+   │  │   │   └─ given: 
+   │  │   ├─ r9: ergo-friction-hazards (l1, 3/3)
+   │  │   │   ├─ exhausted
+   │  │   │   ├─ 0 blockers ✓
+   │  │   │   ├─ 0 nitpicks ✓
+   │  │   │   └─ given: 
+   │  │   ├─ r10: enroll-impl-behavior-intent (l3, 6/6)
+   │  │   │   ├─ approved, cached
+   │  │   │   ├─ 0 blockers ✓
+   │  │   │   ├─ 1 nitpick 🟠
+   │  │   │   ├─ tallied by reviewer@fireworks/deepseek/v4-flash
+   │  │   │   ├─ given: .behavior/v2026_07_08.fix-condition-convergance/.reviews/peer/5.1.execution.from_vision._.review.i015.c7361ac58ab71772fd.r010._.given.by_peer.enroll-impl-behavior-intent.md
+   │  │   │   └─ taken: .behavior/v2026_07_08.fix-condition-convergance/.reviews/peer/5.1.execution.from_vision._.review.i015.c7361ac58ab71772fd.r010._.taken.by_self.enroll-impl-behavior-intent.md
+   │  │   └─ r11: enroll-impl-arch-defects (l3, 3/3)
+   │  │       ├─ approved, cached
+   │  │       ├─ 0 blockers ✓
+   │  │       ├─ 2 nitpicks 🟠
+   │  │       ├─ tallied by reviewer@fireworks/deepseek/v4-flash
+   │  │       ├─ given: .behavior/v2026_07_08.fix-condition-convergance/.reviews/peer/5.1.execution.from_vision._.review.i012.0f1f99b0d9de595b16.r011._.given.by_peer.enroll-impl-arch-defects.md
+   │  │       └─ taken: .behavior/v2026_07_08.fix-condition-convergance/.reviews/peer/5.1.execution.from_vision._.review.i012.0f1f99b0d9de595b16.r011._.taken.by_self.enroll-impl-arch-defects.md
+   │  └─ judges
+   │      └─ j1: $rhachet run --repo bhrain --skill route.stone.judge --mechanism reviewed? --stone $stone --route $route --allow-blockers 0 --allow-nitpicks 3
+   │          └─ finished 0.4s ✓
+   │
+   └─ the way continues, run
+      └─ rhx route.drive

@@ -229,6 +229,86 @@ this is useful when you want to:
 - pass the cache URI to other systems
 - verify cache behavior in tests
 
+### Gate a write on the key's absence (put-if-absent)
+
+opt into a conditional write via the `condition` option (see [Atomic conditional writes](#atomic-conditional-writes) for what these are and when to reach for them). this requires a cache that advertises conditionals (its `get`/`set` accept a `condition`).
+
+set `version: null` to only write if the key is currently absent:
+
+```ts
+import { withSimpleCacheAsync } from 'with-simple-cache';
+
+const runOnce = withSimpleCacheAsync(computeExpensiveResult, {
+  cache: myConditionalCache, // a cache that supports conditional writes
+  condition: {
+    version: null, // put-if-absent: only write if the key is currently absent
+  },
+});
+```
+
+### Gate a write on a version match (compare-and-set)
+
+set `version` to a token to only write if the current version matches — for optimistic concurrency, where you read a version, compute, then write only if no one moved the version out from under you.
+
+the token can be a static value, or an extractor over the operation's args:
+
+```ts
+import { withSimpleCacheAsync } from 'with-simple-cache';
+
+const updateRecord = withSimpleCacheAsync(computeNextRecord, {
+  cache: myConditionalCache,
+  condition: {
+    version: (input) => input.expectedVersion, // compare-and-set: only write if the current version matches this token
+  },
+});
+```
+
+### Converge when you lose the race
+
+use `exception: 'ignore'` to swallow a precondition miss, re-read the key, and return the winner's value — for when you don't care who wins the race, only that everyone ends up with the same value.
+
+```ts
+import { withSimpleCacheAsync } from 'with-simple-cache';
+
+const runOnce = withSimpleCacheAsync(computeExpensiveResult, {
+  cache: myConditionalCache,
+  condition: {
+    version: null,
+    exception: 'ignore', // swallow the conflict, re-read, return the winner's value
+  },
+});
+
+// two racers call at once; one wins the write, the other loses
+const result = await runOnce({ id: 'lock' });
+// the loser quietly converges on the winner's value, instead of a crash
+```
+
+### Recognize a condition conflict across package boundaries
+
+use the exported `isSimpleCacheConditionError` predicate to recognize a re-thrown `SimpleCacheConditionError` — the same cross-package-safe way the wrapper does, without the `instanceof` boundary bug.
+
+```ts
+import {
+  withSimpleCacheAsync,
+  isSimpleCacheConditionError,
+} from 'with-simple-cache';
+
+const runOnce = withSimpleCacheAsync(computeExpensiveResult, {
+  cache: myConditionalCache,
+  condition: { version: null, exception: 'throw' },
+});
+
+try {
+  await runOnce({ id: 'lock' });
+} catch (error) {
+  if (isSimpleCacheConditionError(error)) {
+    // someone beat us to the write — re-read and converge, or handle as you wish
+  } else {
+    throw error;
+  }
+}
+```
+
 
 # Features
 
@@ -264,3 +344,21 @@ const getZodiacSign = withSimpleCache(
   }
 );
 ```
+
+### Atomic conditional writes
+
+By default a cache `set` overwrites whatever is at the key. When two callers race to populate the same key — or you want compare-and-set semantics — an unconditional overwrite is unsafe: the last writer wins, and the first writer's value is silently lost.
+
+A _conditional write_ gates the `set` on a version precondition, so the write only lands if the store is in the state you expect:
+
+- `version: null` → **put-if-absent**: the write lands only if the key is currently absent
+- `version: '<token>'` → **compare-and-set**: the write lands only if the current version matches the token
+
+If the precondition does not hold — someone beat you to the write, or the version moved on — the cache signals a conflict with a `SimpleCacheConditionError`. The `exception` option chooses what happens next:
+
+- `'throw'` (default) → propagate the `SimpleCacheConditionError` to the caller
+- `'ignore'` → swallow it, re-read the key, and return the winner's value (converge)
+
+This is available on any cache that advertises conditionals (its `get`/`set` accept a `condition`), even a backend from a _separate_ package. Because a cross-package error is a different constructor, use the exported `isSimpleCacheConditionError` predicate — not `instanceof` — to recognize a re-thrown conflict.
+
+See the [conditional write examples](#gate-a-write-on-a-version-precondition) above for usage.
