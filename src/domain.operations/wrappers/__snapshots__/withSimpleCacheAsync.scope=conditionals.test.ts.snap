@@ -30,11 +30,28 @@ exports[`withSimpleCacheAsync.scope=conditionals runtime behavior given: a condi
 }"
 `;
 
+exports[`withSimpleCacheAsync.scope=conditionals runtime behavior given: a cross-package conflict (the backend throws a foreign SimpleCacheConditionError) when: exception: throw (default) and the conflict is foreign then: the foreign conflict propagates (recognized, then re-thrown) 1`] = `
+"✋ SimpleCacheConditionError: cache condition failed: expected key to be absent
+
+{
+  "note": "thrown by a backend in another package"
+}"
+`;
+
 exports[`withSimpleCacheAsync.scope=conditionals runtime behavior given: condition and meta: include together (the primary use case) when: a compare-and-set write bumps the version then: cached.version reflects the bumped version 1`] = `
 "{
   "output": "v2-value",
   "cached": {
     "version": "v2"
+  }
+}"
+`;
+
+exports[`withSimpleCacheAsync.scope=conditionals runtime behavior given: condition and meta: include together (the primary use case) when: a put-if-absent write loses the race (converge) then: the loser response carries the winner value and the winner version 1`] = `
+"{
+  "output": "held-by-winner",
+  "cached": {
+    "version": "v1"
   }
 }"
 `;

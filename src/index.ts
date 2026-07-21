@@ -34,4 +34,5 @@ export { withSimpleCache } from './domain.operations/wrappers/withSimpleCache';
 export type { WithSimpleCacheAsyncOptions } from './domain.operations/wrappers/withSimpleCacheAsync';
 export { withSimpleCacheAsync } from './domain.operations/wrappers/withSimpleCacheAsync';
 export { withSimpleCacheOnDisk } from './domain.operations/wrappers/withSimpleCacheOnDisk';
+export { isSimpleCacheConditionError } from './utils/errors/isSimpleCacheConditionError';
 export { SimpleCacheConditionError } from './utils/errors/SimpleCacheConditionError';

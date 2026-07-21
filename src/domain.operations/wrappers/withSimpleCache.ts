@@ -22,7 +22,7 @@ import {
   noOp,
 } from '@src/domain.operations/serde/defaults';
 import { BadRequestError } from '@src/utils/errors/BadRequestError';
-import { SimpleCacheConditionError } from '@src/utils/errors/SimpleCacheConditionError';
+import { isSimpleCacheConditionError } from '@src/utils/errors/isSimpleCacheConditionError';
 
 export type CacheableLogicSync = (...args: any[]) => any;
 
@@ -303,8 +303,9 @@ export const withSimpleCache = <
     // converge a conditional-write conflict per the exception mode (rethrow unless 'ignore')
     const convergeOnWriteConflict = (error: unknown): ReturnType<L> => {
       // rethrow any error that isn't a conditional-write conflict we own
-      if (!(conditionOption && error instanceof SimpleCacheConditionError))
-        throw error;
+      // detect by structural name check, not instanceof — a backend in a separate package
+      // throws a different SimpleCacheConditionError constructor, which instanceof would miss
+      if (!(conditionOption && isSimpleCacheConditionError(error))) throw error;
       // exception: 'throw' (default) → propagate the conflict
       if (conditionOption.exception !== 'ignore') throw error;
       // exception: 'ignore' → re-read and return the winner's value to converge on it.
