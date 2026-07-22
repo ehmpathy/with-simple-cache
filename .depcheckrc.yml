@@ -13,9 +13,15 @@ ignores:
   - rhachet-brains-fireworksai
   - rhachet-brains-xai
   - rhachet-roles-bhrain
+  - rhachet-roles-bhrowser
   - rhachet-roles-bhuild
   - rhachet-roles-ehmpathy
+  - rhachet-roles-ghlitch
   - rhachet-roles-rhachet
+  # deps of vendored role skills under .agent/ (booted from role packages, not this repo's direct deps)
+  - declastruct-aws
+  - declastruct-unix-network
+  - playwright
   - test-fns
   - "@tsconfig/node20"
   - "@tsconfig/strictest"
