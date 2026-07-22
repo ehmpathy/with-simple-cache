@@ -103,8 +103,8 @@
     "tsx": "4.20.6",
     "typescript": "5.4.5",
     "uuid-fns": "^1.0.2",
-    "rhachet-roles-bhrowser": "@declapract{check.minVersion('0.1.0')}",
-    "rhachet-roles-ghlitch": "@declapract{check.minVersion('0.2.5')}",
+    "rhachet-roles-bhrowser": "0.1.0",
+    "rhachet-roles-ghlitch": "0.2.7",
     "yalc": "1.0.0-pre.53"
   },
   "config": {
