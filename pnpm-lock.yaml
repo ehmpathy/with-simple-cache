@@ -70,8 +70,8 @@ importers:
         specifier: ^0.13.21
         version: 0.13.22
       declapract-typescript-ehmpathy:
-        specifier: ^0.49.5
-        version: 0.49.5(declapract@0.13.22)
+        specifier: ^0.49.7
+        version: 0.49.7(declapract@0.13.22)
       declastruct:
         specifier: 1.9.1
         version: 1.9.1(domain-objects@0.31.13)
@@ -2535,8 +2535,8 @@ packages:
       supports-color:
         optional: true
 
-  declapract-typescript-ehmpathy@0.49.5:
-    resolution: {integrity: sha512-UpHpmDX9JTjsbbvwRc8OuGplcQbw0cPZzm4HAi3jpCcUd8ynJqSFUZGFrt19b/4iRkbTWI7fKRd1O98KxwNiIA==}
+  declapract-typescript-ehmpathy@0.49.7:
+    resolution: {integrity: sha512-tEdfaudUO0EyrBzUgopPKZB90gk1mP13V5ErKWBO/D4gO++81erSzLCwnTt2343fKj8hINuz3v3c3eJ1kf748A==}
     peerDependencies:
       declapract: '>=0.13.26'
 
@@ -7381,7 +7381,7 @@ snapshots:
     dependencies:
       ms: 2.1.3
 
-  declapract-typescript-ehmpathy@0.49.5(declapract@0.13.22):
+  declapract-typescript-ehmpathy@0.49.7(declapract@0.13.22):
     dependencies:
       declapract: 0.13.22
       domain-objects: 0.31.13

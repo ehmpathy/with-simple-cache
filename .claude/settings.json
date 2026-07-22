@@ -357,6 +357,12 @@
             "command": "./node_modules/.bin/rhachet roles boot --role librarian",
             "timeout": 30,
             "author": "repo=bhrain/role=librarian"
+          },
+          {
+            "type": "command",
+            "command": "./node_modules/.bin/rhachet roles boot --role learner",
+            "timeout": 30,
+            "author": "repo=bhrain/role=learner"
           }
         ]
       },
@@ -478,6 +484,17 @@
             "command": "./node_modules/.bin/rhx route.mutate.guard --mode hook",
             "timeout": 5,
             "author": "repo=bhrain/role=driver"
+          }
+        ]
+      },
+      {
+        "matcher": "Write|Edit|Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "./node_modules/.bin/rhx memory.guard --mode hook",
+            "timeout": 5,
+            "author": "repo=bhrain/role=learner"
           }
         ]
       }
